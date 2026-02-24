@@ -58,4 +58,15 @@ export const markContactRead = (id) => api.put(`/contacts/${id}/read`);
 export const deleteContact = (id) => api.delete(`/contacts/${id}`);
 export const sendContact = (data) => api.post('/contacts', data);
 
+// Contact Info (email, phone, social links)
+export const getContactInfo = () => api.get('/contact-info');
+export const updateContactInfo = (data) => api.put('/contact-info', data);
+
+// Books
+export const getBooks = () => api.get('/books');
+export const getBook = (id) => api.get(`/books/${id}`);
+export const createBook = (data) => api.post('/books', data);
+export const updateBook = (id, data) => api.put(`/books/${id}`, data);
+export const deleteBook = (id) => api.delete(`/books/${id}`);
+
 export default api;

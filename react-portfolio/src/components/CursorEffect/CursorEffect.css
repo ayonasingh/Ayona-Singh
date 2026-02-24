@@ -1,0 +1,113 @@
+/* ═══════════════════════════════════════════
+   Beautiful Premium Cursor Effect
+   ═══════════════════════════════════════════ */
+
+/* Hide default cursor everywhere */
+*,
+*::before,
+*::after {
+    cursor: none !important;
+}
+
+/* ── Main dot ── */
+.cursor-dot {
+    position: fixed;
+    top: -6px;
+    left: -6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: hsl(250, 69%, 61%);
+    pointer-events: none;
+    z-index: 99999;
+    will-change: transform;
+    transition: opacity 0.3s, width 0.2s, height 0.2s, background 0.2s;
+    box-shadow: 0 0 10px hsl(250, 69%, 61%), 0 0 20px hsl(250, 69%, 61%, 0.5);
+    mix-blend-mode: normal;
+}
+
+/* ── Ring ── */
+.cursor-ring {
+    position: fixed;
+    top: -20px;
+    left: -20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid hsl(250, 69%, 61%, 0.6);
+    pointer-events: none;
+    z-index: 99998;
+    will-change: transform;
+    transition: opacity 0.3s, width 0.25s cubic-bezier(.34, 1.56, .64, 1),
+        height 0.25s cubic-bezier(.34, 1.56, .64, 1),
+        border-color 0.25s;
+    backdrop-filter: blur(0px);
+}
+
+/* ── Hover state ── */
+.cursor-dot--hover {
+    width: 6px;
+    height: 6px;
+    top: -3px;
+    left: -3px;
+    background: hsl(300, 80%, 65%);
+    box-shadow: 0 0 12px hsl(300, 80%, 65%), 0 0 30px hsl(300, 80%, 65%, 0.4);
+}
+
+.cursor-ring--hover {
+    width: 64px;
+    height: 64px;
+    top: -32px;
+    left: -32px;
+    border-color: hsl(300, 80%, 65%, 0.5);
+    border-width: 1.5px;
+    background: hsl(300, 80%, 65%, 0.06);
+}
+
+/* ── Click burst on dot ── */
+.cursor-dot--click {
+    transform: scale(0.5) !important;
+    background: hsl(50, 100%, 65%);
+    box-shadow: 0 0 20px hsl(50, 100%, 65%), 0 0 40px hsl(50, 100%, 65%, 0.5);
+    transition: transform 0.1s, background 0.1s, box-shadow 0.1s;
+}
+
+/* ── Particle on click ── */
+.cursor-particle {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: hsl(250, 80%, 70%);
+    pointer-events: none;
+    z-index: 99997;
+    transform: translate(-50%, -50%);
+    animation: cursorParticleBurst 0.6s ease-out forwards;
+}
+
+@keyframes cursorParticleBurst {
+    0% {
+        transform: translate(-50%, -50%) translate(0, 0) scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* ── Don't apply on touch devices ── */
+@media (hover: none) and (pointer: coarse) {
+
+    *,
+    *::before,
+    *::after {
+        cursor: auto !important;
+    }
+
+    .cursor-dot,
+    .cursor-ring {
+        display: none;
+    }
+}

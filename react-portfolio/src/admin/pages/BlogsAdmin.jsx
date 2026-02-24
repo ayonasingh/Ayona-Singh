@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { BiEdit, BiTrash, BiPlus, BiX, BiUpload, BiCalendar, BiTime } from 'react-icons/bi';
 
 const EMPTY_FORM = {
-    tag: '', date: '', readTime: '', title: '', excerpt: '', image: '', link: '#',
+    tag: '', date: '', readTime: '', title: '', excerpt: '', content: '', image: '', link: '#',
 };
 
 const BlogsAdmin = () => {
@@ -35,13 +35,14 @@ const BlogsAdmin = () => {
     };
 
     const openEdit = (blog) => {
-        setEditId(blog.id);
+        setEditId(blog.id || blog._id);
         setForm({
             tag: blog.tag || '',
             date: blog.date || '',
             readTime: blog.readTime || '',
             title: blog.title || '',
             excerpt: blog.excerpt || '',
+            content: blog.content || '',
             image: blog.image || '',
             link: blog.link || '#',
         });
@@ -189,7 +190,24 @@ const BlogsAdmin = () => {
                                 <label className="admin-form__label">Excerpt *</label>
                                 <textarea className="admin-form__textarea" value={form.excerpt} required
                                     onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
-                                    placeholder="Short summary of the blog post..." />
+                                    placeholder="Short summary of the blog post (shown on cards)..." />
+                            </div>
+
+                            <div className="admin-form__group">
+                                <label className="admin-form__label">Full Article Content</label>
+                                <p style={{ fontSize: '0.78rem', color: 'var(--admin-text-muted)', marginBottom: '0.5rem' }}>
+                                    Write the full article below. Use <code style={{ background: 'rgba(255,255,255,0.08)', padding: '0 4px', borderRadius: 3 }}>## Heading</code> for sections,
+                                    <code style={{ background: 'rgba(255,255,255,0.08)', padding: '0 4px', borderRadius: 3, marginLeft: 4 }}>**bold**</code>,
+                                    <code style={{ background: 'rgba(255,255,255,0.08)', padding: '0 4px', borderRadius: 3, marginLeft: 4 }}>- list items</code>, and
+                                    <code style={{ background: 'rgba(255,255,255,0.08)', padding: '0 4px', borderRadius: 3, marginLeft: 4 }}>```code```</code>.
+                                </p>
+                                <textarea
+                                    className="admin-form__textarea"
+                                    value={form.content}
+                                    onChange={(e) => setForm({ ...form, content: e.target.value })}
+                                    placeholder="Write the full blog article here...&#10;&#10;## Introduction&#10;...&#10;&#10;## Section 1&#10;"
+                                    style={{ minHeight: '240px', fontFamily: 'monospace', fontSize: '0.85rem', lineHeight: 1.6 }}
+                                />
                             </div>
 
                             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>

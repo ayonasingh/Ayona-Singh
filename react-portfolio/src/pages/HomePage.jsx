@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './HomePage.css';
 import '../pages/pages.css';
+import axios from 'axios';
 
 import AyonaHero from '../assets/ayona_profile.jpg';
 import AyonaAbout from '../assets/ayona_about.jpg';
@@ -17,8 +18,10 @@ import {
     BiTime, BiCalendar, BiTrophy, BiCodeBlock,
 } from 'react-icons/bi';
 
+const BASE_URL = 'http://localhost:5000/api';
+
 /* ── Typing animation hook ── */
-const TYPED_STRINGS = [
+const DEFAULT_TYPED_STRINGS = [
     'Mathematics Student',
     'Data Analyst',
     'Math Tutor',
@@ -26,14 +29,14 @@ const TYPED_STRINGS = [
     'Research Enthusiast',
 ];
 
-function useTyping() {
+function useTyping(strings = DEFAULT_TYPED_STRINGS) {
     const [display, setDisplay] = useState('');
     const [index, setIndex] = useState(0);
     const [charIdx, setCharIdx] = useState(0);
     const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
-        const current = TYPED_STRINGS[index];
+        const current = strings[index];
         const speed = deleting ? 50 : 100;
 
         const timer = setTimeout(() => {
@@ -48,7 +51,7 @@ function useTyping() {
                 setDisplay(current.slice(0, charIdx - 1));
                 if (charIdx - 1 === 0) {
                     setDeleting(false);
-                    setIndex(i => (i + 1) % TYPED_STRINGS.length);
+                    setIndex(i => (i + 1) % strings.length);
                     setCharIdx(0);
                 } else {
                     setCharIdx(c => c - 1);
@@ -57,7 +60,7 @@ function useTyping() {
         }, speed);
 
         return () => clearTimeout(timer);
-    }, [charIdx, deleting, index]);
+    }, [charIdx, deleting, index, strings]);
 
     return display;
 }
@@ -80,7 +83,7 @@ function useCounter(target, duration = 1800, active) {
 }
 
 /* ── Scroll-reveal hook ── */
-function useReveal(delay = 0) {
+function useReveal() {
     const ref = useRef(null);
     const [visible, setVisible] = useState(false);
     useEffect(() => {
@@ -177,11 +180,82 @@ const BLOG_PREVIEWS = [
     { tag: 'Linear Algebra', date: 'Jan 15, 2026', title: 'Eigenvalues, Eigenvectors & Why They Matter', excerpt: "Eigenvalues are everywhere — from Google's PageRank to quantum mechanics. Let's explore their real-world applications.", img: Img3 },
 ];
 
+/* ── Fallback book cards ── */
+const BOOK_FALLBACKS = [
+    { id: 'b1', title: 'Atomic Habits', author: 'James Clear', genre: 'Self Help', rating: 5, excerpt: 'An easy and proven way to build good habits and break bad ones. Tiny changes, remarkable results.', coverImage: '', readDate: 'Jan 2025' },
+    { id: 'b2', title: 'Thinking, Fast and Slow', author: 'Daniel Kahneman', genre: 'Psychology & Probability', rating: 4, excerpt: 'A fascinating tour of the mind exploring the two systems that drive the way we think.', coverImage: '', readDate: 'Dec 2024' },
+    { id: 'b3', title: "Fermat's Enigma", author: 'Simon Singh', genre: 'Mathematics History', rating: 5, excerpt: 'The epic quest to solve the world\'s greatest mathematical problem — Fermat\'s Last Theorem.', coverImage: '', readDate: 'Oct 2024' },
+    { id: 'b4', title: 'The Man Who Knew Infinity', author: 'Robert Kanigel', genre: 'Biography', rating: 5, excerpt: 'The remarkable life of Srinivasa Ramanujan, a self-taught mathematical genius from India.', coverImage: '', readDate: 'Sep 2024' },
+];
+
 /* ══════════════════════════════════════════════════
    MAIN COMPONENT
 ══════════════════════════════════════════════════ */
 const HomePage = () => {
     const typed = useTyping();
+
+    /* API data */
+    const [heroData, setHeroData] = useState({ name: 'Ayona Singh', description: 'A passionate Mathematics student with a strong foundation in Calculus, Statistics, Linear Algebra & Mathematical Modelling. I love solving complex problems and applying mathematical reasoning to real-world challenges.' });
+    const [skillBars, setSkillBars] = useState([
+        { name: 'Calculus', pct: 90 }, { name: 'Linear Algebra', pct: 85 },
+        { name: 'Statistics', pct: 80 }, { name: 'Python', pct: 72 },
+        { name: 'MATLAB', pct: 60 }, { name: 'LaTeX', pct: 75 },
+    ]);
+    const [featuredBlogs, setFeaturedBlogs] = useState([]);
+    const [featuredBooks, setFeaturedBooks] = useState(BOOK_FALLBACKS);
+    const [contactInfo, setContactInfo] = useState({ linkedin: 'https://www.linkedin.com/in/ayona-singh-10b5561b8/', github: 'https://github.com/', instagram: 'https://www.instagram.com/' });
+
+    useEffect(() => {
+        // Fetch home section
+        axios.get(`${BASE_URL}/home`).then((res) => {
+            if (res.data) setHeroData(res.data);
+        }).catch(() => { });
+
+        // Fetch skills for progress bars
+        axios.get(`${BASE_URL}/skills`).then((res) => {
+            if (res.data) {
+                const levelMap = { Advanced: 90, Intermediate: 70, Basic: 45 };
+                const allSkills = [
+                    ...(res.data.mathCore || []),
+                    ...(res.data.tools || []),
+                ].slice(0, 6).map((s) => ({ name: s.name, pct: levelMap[s.level] || 60 }));
+                if (allSkills.length > 0) setSkillBars(allSkills);
+            }
+        }).catch(() => { });
+
+        // Fetch blogs for "Recent Articles"
+        axios.get(`${BASE_URL}/blogs`).then((res) => {
+            if (res.data && res.data.length > 0) {
+                setFeaturedBlogs(res.data.slice(0, 3));
+            } else {
+                setFeaturedBlogs(BLOG_PREVIEWS);
+            }
+        }).catch(() => setFeaturedBlogs(BLOG_PREVIEWS));
+
+        // Fetch contact info for social links
+        axios.get(`${BASE_URL}/contact-info`).then((res) => {
+            if (res.data) setContactInfo(res.data);
+        }).catch(() => { });
+
+        // Fetch featured books
+        axios.get(`${BASE_URL}/books`).then((res) => {
+            if (res.data && res.data.length > 0) {
+                // prefer featured, fall back to all, always show 4
+                const featured = res.data.filter(b => b.featured);
+                const toShow = (featured.length >= 4 ? featured : res.data).slice(0, 4);
+                setFeaturedBooks(toShow);
+            } else {
+                setFeaturedBooks(BOOK_FALLBACKS);
+            }
+        }).catch(() => setFeaturedBooks(BOOK_FALLBACKS));
+    }, []);
+
+    const getBlogImage = (blog, index) => {
+        if (blog.img) return blog.img;
+        if (blog.image) return blog.image;
+        const fallbacks = [Img1, Img2, Img3];
+        return fallbacks[index % fallbacks.length];
+    };
 
     /* Stats reveal */
     const [statsRef, statsVisible] = useReveal();
@@ -190,6 +264,7 @@ const HomePage = () => {
     const [whatRef, whatVisible] = useReveal();
     const [skillRef, skillVisible] = useReveal();
     const [blogRef, blogVisible] = useReveal();
+    const [bookRef, bookVisible] = useReveal();
     const [ctaRef, ctaVisible] = useReveal();
 
     return (
@@ -219,7 +294,7 @@ const HomePage = () => {
                         </div>
 
                         <h1 className="lp-hero__name">
-                            <span>Ayona Singh</span>
+                            <span>{heroData.name || 'Ayona Singh'}</span>
                         </h1>
 
                         <div className="lp-hero__typed-wrap">
@@ -228,10 +303,7 @@ const HomePage = () => {
                         </div>
 
                         <p className="lp-hero__description">
-                            A passionate Mathematics student with a strong foundation in Calculus,
-                            Statistics, Linear Algebra &amp; Mathematical Modelling. I love solving
-                            complex problems and applying mathematical reasoning to real-world
-                            challenges.
+                            {heroData.description || 'A passionate Mathematics student with a strong foundation in Calculus, Statistics, Linear Algebra & Mathematical Modelling.'}
                         </p>
 
                         <div className="lp-hero__buttons">
@@ -245,13 +317,13 @@ const HomePage = () => {
 
                         <div className="lp-hero__social">
                             <span className="lp-hero__social-label">Follow me</span>
-                            <a href="https://www.linkedin.com/in/ayona-singh-10b5561b8/" className="lp-hero__social-link" target="_blank" rel="noreferrer">
+                            <a href={contactInfo.linkedin || 'https://www.linkedin.com/in/ayona-singh-10b5561b8/'} className="lp-hero__social-link" target="_blank" rel="noreferrer">
                                 <BiLogoLinkedin />
                             </a>
-                            <a href="https://github.com/" className="lp-hero__social-link" target="_blank" rel="noreferrer">
+                            <a href={contactInfo.github || 'https://github.com/'} className="lp-hero__social-link" target="_blank" rel="noreferrer">
                                 <BiLogoGithub />
                             </a>
-                            <a href="https://www.instagram.com/" className="lp-hero__social-link" target="_blank" rel="noreferrer">
+                            <a href={contactInfo.instagram || 'https://www.instagram.com/'} className="lp-hero__social-link" target="_blank" rel="noreferrer">
                                 <BiLogoInstagram />
                             </a>
                         </div>
@@ -345,12 +417,9 @@ const HomePage = () => {
                         </p>
 
                         <div className="lp-skills__bars">
-                            <SkillBar name="Calculus" pct={90} />
-                            <SkillBar name="Linear Algebra" pct={85} />
-                            <SkillBar name="Statistics" pct={80} />
-                            <SkillBar name="Python" pct={72} />
-                            <SkillBar name="MATLAB" pct={60} />
-                            <SkillBar name="LaTeX" pct={75} />
+                            {skillBars.map((s) => (
+                                <SkillBar key={s.name} name={s.name} pct={s.pct} />
+                            ))}
                         </div>
 
                         <div style={{ marginTop: '2rem' }}>
@@ -373,14 +442,14 @@ const HomePage = () => {
                 </div>
 
                 <div className="lp-blogs__grid">
-                    {BLOG_PREVIEWS.map((b, i) => (
+                    {featuredBlogs.map((b, i) => (
                         <div
                             key={i}
                             className={`lp-blog-card reveal ${blogVisible ? 'visible' : ''}`}
                             style={{ transitionDelay: `${i * 0.12}s` }}
                         >
                             <div className="lp-blog-card__img-wrap">
-                                <img src={b.img} alt={b.title} className="lp-blog-card__img" />
+                                <img src={getBlogImage(b, i)} alt={b.title} className="lp-blog-card__img" />
                                 <span className="lp-blog-card__tag">{b.tag}</span>
                             </div>
                             <div className="lp-blog-card__body">
@@ -391,7 +460,7 @@ const HomePage = () => {
                                         <BiCalendar style={{ verticalAlign: 'middle', marginRight: 3 }} />
                                         {b.date}
                                     </span>
-                                    <Link to="/blogs" className="lp-blog-card__link">
+                                    <Link to={`/blogs/${b.id || b._id}`} className="lp-blog-card__link">
                                         Read <BiRightArrowAlt />
                                     </Link>
                                 </div>
@@ -403,6 +472,76 @@ const HomePage = () => {
                 <div className="lp-blogs__cta">
                     <Link to="/blogs" className="lp-hero__btn-secondary">
                         View All Blogs <BiRightArrowAlt />
+                    </Link>
+                </div>
+            </section>
+
+            {/*══════ BOOKS ══════*/}
+            <section className="lp-books" ref={bookRef}>
+                <div className={`lp-section__header reveal ${bookVisible ? 'visible' : ''}`}>
+                    <span className="lp-section__tag">📚 Reading List</span>
+                    <h2 className="lp-section__title">Books I Recommend</h2>
+                    <p className="lp-section__subtitle">
+                        Reviews and reflections from my personal library — mathematics, statistics, biography &amp; data science.
+                    </p>
+                </div>
+
+                <div className="lp-books__grid">
+                    {featuredBooks.map((book, i) => {
+                        const id = book._id || book.id;
+                        const cover = book.coverImage || [Img1, Img2, Img3][i % 3];
+                        const genreColors = {
+                            'Mathematics': '#6d28d9', 'Statistics': '#0284c7', 'Biography': '#9d174d',
+                            'Python & Data Science': '#065f46', 'Psychology & Probability': '#c2410c',
+                            'Mathematics History': '#5b21b6', 'Self Help': '#ea580c',
+                            'Productivity': '#b45309', 'Science': '#0e7490', 'Other': '#4338ca',
+                        };
+                        const genreColor = genreColors[book.genre] || '#6d28d9';
+                        return (
+                            <div
+                                key={id}
+                                className={`lp-book-card reveal ${bookVisible ? 'visible' : ''}`}
+                                style={{ transitionDelay: `${i * 0.1}s` }}
+                            >
+                                <Link to={`/books/${id}`} className="lp-book-card__cover-link">
+                                    <img src={cover} alt={book.title} className="lp-book-card__cover" />
+                                    <div className="lp-book-card__cover-shine" />
+                                    {book.readDate && (
+                                        <span className="lp-book-card__read-badge">📖 {book.readDate}</span>
+                                    )}
+                                </Link>
+                                <div className="lp-book-card__body">
+                                    <span className="lp-book-card__genre"
+                                        style={{ background: genreColor + '22', color: genreColor }}>
+                                        {book.genre}
+                                    </span>
+                                    <h3 className="lp-book-card__title">
+                                        <Link to={`/books/${id}`}>{book.title}</Link>
+                                    </h3>
+                                    <p className="lp-book-card__author">by {book.author}</p>
+                                    <div className="lp-book-card__stars">
+                                        {[1, 2, 3, 4, 5].map(s => (
+                                            <span key={s} style={{ color: s <= (book.rating || 5) ? '#f59e0b' : 'rgba(150,120,80,0.3)' }}>★</span>
+                                        ))}
+                                    </div>
+                                    <p className="lp-book-card__excerpt">{book.excerpt}</p>
+                                    <div className="lp-book-card__actions">
+                                        <Link to={`/books/${id}`} className="lp-book-card__review">Read Review →</Link>
+                                        {book.downloadLink && (
+                                            <a href={book.downloadLink} target="_blank" rel="noreferrer" className="lp-book-card__dl">
+                                                ⬇ PDF
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                <div className="lp-blogs__cta">
+                    <Link to="/books" className="lp-hero__btn-secondary">
+                        View All Books <BiRightArrowAlt />
                     </Link>
                 </div>
             </section>

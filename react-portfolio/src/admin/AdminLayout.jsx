@@ -7,14 +7,18 @@ import {
     BiGridAlt, BiEdit, BiUser, BiBook,
     BiMessageSquareDetail, BiHomeAlt, BiCog,
     BiLogOut, BiMenu, BiX, BiChevronRight,
+    BiImage, BiPhone,
 } from 'react-icons/bi';
 
 const navItems = [
     { to: '/admin/dashboard', icon: <BiGridAlt />, label: 'Dashboard' },
     { to: '/admin/home', icon: <BiHomeAlt />, label: 'Home' },
-    { to: '/admin/about', icon: <BiUser />, label: 'About' },
+    { to: '/admin/about', icon: <BiUser />, label: 'About & Qualification' },
     { to: '/admin/skills', icon: <BiCog />, label: 'Skills' },
     { to: '/admin/blogs', icon: <BiEdit />, label: 'Blogs' },
+    { to: '/admin/books', icon: <BiBook />, label: 'Books' },
+    { to: '/admin/portfolio', icon: <BiImage />, label: 'Portfolio' },
+    { to: '/admin/contact-info', icon: <BiPhone />, label: 'Contact Info' },
     { to: '/admin/messages', icon: <BiMessageSquareDetail />, label: 'Messages' },
 ];
 

@@ -5,13 +5,18 @@ import { Toaster } from 'react-hot-toast';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 import ScrollUp from './components/ScrollUp/ScrollUp';
+import CursorEffect from './components/CursorEffect/CursorEffect';
 
 /* Pages */
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import SkillsPage from './pages/SkillsPage';
 import BlogsPage from './pages/BlogsPage';
+import BlogDetailPage from './pages/BlogDetailPage';
+import BooksPage from './pages/BooksPage';
+import BookDetailPage from './pages/BookDetailPage';
 import ContactPage from './pages/ContactPage';
+import PortfolioPage from './pages/PortfolioPage';
 
 /* Admin */
 import { AdminProvider } from './admin/AdminContext';
@@ -23,7 +28,10 @@ import HomeAdmin from './admin/pages/HomeAdmin';
 import AboutAdmin from './admin/pages/AboutAdmin';
 import SkillsAdmin from './admin/pages/SkillsAdmin';
 import BlogsAdmin from './admin/pages/BlogsAdmin';
+import BooksAdmin from './admin/pages/BooksAdmin';
 import MessagesAdmin from './admin/pages/MessagesAdmin';
+import PortfolioAdmin from './admin/pages/PortfolioAdmin';
+import ContactAdmin from './admin/pages/ContactAdmin';
 
 /* Admin CSS imports */
 import './admin/AdminLayout.css';
@@ -32,6 +40,7 @@ import './admin/AdminModal.css';
 function App() {
   return (
     <AdminProvider>
+      <CursorEffect />
       <Toaster
         position="top-right"
         toastOptions={{
@@ -59,7 +68,11 @@ function App() {
                     <Route path="/about" element={<AboutPage />} />
                     <Route path="/skills" element={<SkillsPage />} />
                     <Route path="/blogs" element={<BlogsPage />} />
+                    <Route path="/blogs/:id" element={<BlogDetailPage />} />
+                    <Route path="/books" element={<BooksPage />} />
+                    <Route path="/books/:id" element={<BookDetailPage />} />
                     <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/portfolio" element={<PortfolioPage />} />
                   </Routes>
                 </main>
                 <Footer />
@@ -83,6 +96,9 @@ function App() {
             <Route path="about" element={<AboutAdmin />} />
             <Route path="skills" element={<SkillsAdmin />} />
             <Route path="blogs" element={<BlogsAdmin />} />
+            <Route path="books" element={<BooksAdmin />} />
+            <Route path="portfolio" element={<PortfolioAdmin />} />
+            <Route path="contact-info" element={<ContactAdmin />} />
             <Route path="messages" element={<MessagesAdmin />} />
           </Route>
         </Routes>
@@ -92,3 +108,4 @@ function App() {
 }
 
 export default App;
+

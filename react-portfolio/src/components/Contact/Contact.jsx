@@ -1,12 +1,24 @@
-import React, { useState } from 'react';
-import "./Contact.css";
-import { BiMailSend, BiRightArrowAlt, BiLogoWhatsapp, BiLogoLinkedin, BiSend } from "react-icons/bi";
-import { sendContact } from '../../admin/api';
+import React, { useState, useEffect } from 'react';
+import './Contact.css';
+import { BiMailSend, BiRightArrowAlt, BiLogoWhatsapp, BiLogoLinkedin, BiSend, BiPhone } from 'react-icons/bi';
+import { sendContact, getContactInfo } from '../../admin/api';
 import toast from 'react-hot-toast';
 
 const Contact = () => {
     const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
     const [sending, setSending] = useState(false);
+    const [contactInfo, setContactInfo] = useState({
+        email: 'ayona.singh@email.com',
+        phone: '+91 XXXXXXXXXX',
+        whatsapp: '91XXXXXXXXXX',
+        linkedin: 'https://www.linkedin.com/in/ayona-singh-10b5561b8/',
+    });
+
+    useEffect(() => {
+        getContactInfo()
+            .then((res) => setContactInfo(res.data))
+            .catch(() => { /* use defaults */ });
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -16,7 +28,7 @@ const Contact = () => {
         setSending(true);
         try {
             await sendContact(form);
-            toast.success('Message sent! I\'ll get back to you soon ✨');
+            toast.success("Message sent! I'll get back to you soon ✨");
             setForm({ name: '', email: '', subject: '', message: '' });
         } catch {
             toast.error('Failed to send message. Please try again.');
@@ -38,22 +50,30 @@ const Contact = () => {
                         <div className="contact__card">
                             <BiMailSend className="contact__card-icon" />
                             <h3 className="contact__card-title">Email</h3>
-                            <span className="contact__card-data">ayona.singh@email.com</span>
-                            <a href="mailto:ayona.singh@email.com" className="contact__button">Write me <BiRightArrowAlt className="contact__button-icon" /></a>
+                            <span className="contact__card-data">{contactInfo.email}</span>
+                            <a href={`mailto:${contactInfo.email}`} className="contact__button">
+                                Write me <BiRightArrowAlt className="contact__button-icon" />
+                            </a>
                         </div>
 
                         <div className="contact__card">
                             <BiLogoWhatsapp className="contact__card-icon" />
                             <h3 className="contact__card-title">WhatsApp</h3>
-                            <span className="contact__card-data">+91 XXXXXXXXXX</span>
-                            <a href="https://api.whatsapp.com/send?phone=91XXXXXXXXXX&text=Hello, Ayona!" className="contact__button">Write me <BiRightArrowAlt className="contact__button-icon" /></a>
+                            <span className="contact__card-data">{contactInfo.phone}</span>
+                            <a href={`https://api.whatsapp.com/send?phone=${contactInfo.whatsapp}&text=Hello, Ayona!`} className="contact__button">
+                                Write me <BiRightArrowAlt className="contact__button-icon" />
+                            </a>
                         </div>
 
                         <div className="contact__card">
                             <BiLogoLinkedin className="contact__card-icon" />
                             <h3 className="contact__card-title">LinkedIn</h3>
-                            <span className="contact__card-data">ayona-singh</span>
-                            <a href="https://www.linkedin.com/in/ayona-singh-10b5561b8/" className="contact__button" target="_blank" rel="noreferrer">Connect <BiRightArrowAlt className="contact__button-icon" /></a>
+                            <span className="contact__card-data">
+                                {contactInfo.linkedin?.replace('https://www.linkedin.com/in/', '').replace('/', '') || 'ayona-singh'}
+                            </span>
+                            <a href={contactInfo.linkedin} className="contact__button" target="_blank" rel="noreferrer">
+                                Connect <BiRightArrowAlt className="contact__button-icon" />
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -122,7 +142,7 @@ const Contact = () => {
                 </div>
             </div>
         </section>
-    )
-}
+    );
+};
 
 export default Contact;

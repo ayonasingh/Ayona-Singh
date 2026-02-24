@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Header.css';
 import { NavLink } from 'react-router-dom';
 import {
-    BiHomeAlt, BiUser, BiFileBlank, BiEdit,
+    BiHomeAlt, BiUser, BiFileBlank, BiEdit, BiBook,
     BiMessageSquareDetail, BiGridAlt, BiX
 } from "react-icons/bi";
 
@@ -70,6 +70,15 @@ const Header = () => {
                             </NavLink>
                         </li>
 
+                        <li className="nav__item">
+                            <NavLink
+                                to="/books"
+                                className={({ isActive }) => isActive ? "nav__link active-link" : "nav__link"}
+                                onClick={closeMenu}
+                            >
+                                <BiBook className="nav__icon" /> Books
+                            </NavLink>
+                        </li>
 
                         <li className="nav__item">
                             <NavLink

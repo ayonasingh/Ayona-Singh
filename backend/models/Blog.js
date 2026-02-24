@@ -5,6 +5,10 @@ const blogSchema = new mongoose.Schema({
     content: { type: String, default: '' },
     excerpt: { type: String, default: '' },
     image: { type: String, default: '' },
+    tag: { type: String, default: '' },
+    date: { type: String, default: '' },
+    readTime: { type: String, default: '' },
+    link: { type: String, default: '#' },
     tags: [String],
     published: { type: Boolean, default: true },
 }, { timestamps: true });

@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
-const multer = require('multer');
+// multer is loaded via Cloudinary config
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
@@ -40,7 +40,7 @@ if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
 // ===== DB: MongoDB Models =====
-let SiteContent, Blog, Contact;
+let SiteContent, Blog, Contact, Book;
 let useDB = false;
 
 // ===== Fallback: JSON helpers =====
@@ -67,6 +67,7 @@ const connectDB = async () => {
         SiteContent = require('./models/SiteContent');
         Blog = require('./models/Blog');
         Contact = require('./models/Contact');
+        Book = require('./models/Book');
         useDB = true;
 
         await seedDefaults();
@@ -121,6 +122,16 @@ const DEFAULT_SECTIONS = {
             { id: 't4', name: 'MS Excel', level: 'Advanced' },
             { id: 't5', name: 'Data Analysis', level: 'Intermediate' }
         ]
+    },
+    contactInfo: {
+        email: 'ayona.singh@email.com',
+        phone: '+91 XXXXXXXXXX',
+        whatsapp: '91XXXXXXXXXX',
+        linkedin: 'https://www.linkedin.com/in/ayona-singh-10b5561b8/',
+        github: 'https://github.com/',
+        instagram: 'https://www.instagram.com/',
+        cvLink: '',
+        location: 'New Delhi, India'
     }
 };
 
@@ -159,24 +170,8 @@ const setSection = async (section, data) => {
     return json[section];
 };
 
-// ===== Multer =====
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadsDir),
-    filename: (req, file, cb) => {
-        const ext = path.extname(file.originalname);
-        cb(null, `${uuidv4()}${ext}`);
-    },
-});
-const upload = multer({
-    storage,
-    fileFilter: (req, file, cb) => {
-        const allowed = /jpeg|jpg|png|gif|webp|svg/;
-        if (allowed.test(path.extname(file.originalname).toLowerCase()) && allowed.test(file.mimetype))
-            cb(null, true);
-        else cb(new Error('Only images are allowed'));
-    },
-    limits: { fileSize: 5 * 1024 * 1024 },
-});
+// ===== Cloudinary Upload =====
+const { upload, deleteFromCloudinary } = require('./config/cloudinary');
 
 // ===== Auth Middleware =====
 const authenticate = (req, res, next) => {
@@ -210,10 +205,15 @@ app.get('/api/auth/verify', authenticate, (req, res) => {
 // ============================
 // IMAGE UPLOAD ROUTE
 // ============================
-app.post('/api/upload', authenticate, upload.single('image'), (req, res) => {
-    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-    const url = `http://localhost:${PORT}/uploads/${req.file.filename}`;
-    res.json({ url, filename: req.file.filename });
+app.post('/api/upload', authenticate, (req, res, next) => {
+    upload.single('image')(req, res, (err) => {
+        if (err) return res.status(400).json({ error: err.message });
+        if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+        // Cloudinary returns the URL in req.file.path
+        const url = req.file.path;
+        const publicId = req.file.filename;
+        res.json({ url, publicId });
+    });
 });
 
 // ============================
@@ -277,6 +277,77 @@ app.put('/api/skills', authenticate, async (req, res) => {
         const data = await setSection('skills', req.body);
         if (global.io) global.io.emit('content_updated', { section: 'skills', data });
         res.json(data);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ============================
+// CONTACT INFO ROUTES
+// ============================
+app.get('/api/contact-info', async (req, res) => {
+    try { res.json(await getSection('contactInfo')); }
+    catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.put('/api/contact-info', authenticate, async (req, res) => {
+    try {
+        const data = await setSection('contactInfo', req.body);
+        if (global.io) global.io.emit('content_updated', { section: 'contactInfo', data });
+        res.json(data);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ============================
+// PORTFOLIO PROJECTS ROUTES
+// ============================
+app.get('/api/portfolio', async (req, res) => {
+    try {
+        const projects = readJSON('portfolio.json');
+        res.json(projects);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/portfolio/:id', async (req, res) => {
+    try {
+        const projects = readJSON('portfolio.json');
+        const project = projects.find((p) => p.id === req.params.id);
+        if (!project) return res.status(404).json({ error: 'Project not found' });
+        res.json(project);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/portfolio', authenticate, async (req, res) => {
+    try {
+        const projects = readJSON('portfolio.json');
+        const newProject = { id: uuidv4(), ...req.body, createdAt: new Date().toISOString() };
+        projects.unshift(newProject);
+        writeJSON('portfolio.json', projects);
+        if (global.io) global.io.emit('content_updated', { section: 'portfolio', action: 'create', data: newProject });
+        res.status(201).json(newProject);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.put('/api/portfolio/:id', authenticate, async (req, res) => {
+    try {
+        const projects = readJSON('portfolio.json');
+        const index = projects.findIndex((p) => p.id === req.params.id);
+        if (index === -1) return res.status(404).json({ error: 'Project not found' });
+        projects[index] = { ...projects[index], ...req.body };
+        writeJSON('portfolio.json', projects);
+        if (global.io) global.io.emit('content_updated', { section: 'portfolio', action: 'update', data: projects[index] });
+        res.json(projects[index]);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/portfolio/:id', authenticate, async (req, res) => {
+    try {
+        let projects = readJSON('portfolio.json');
+        const project = projects.find((p) => p.id === req.params.id);
+        if (!project) return res.status(404).json({ error: 'Project not found' });
+        await deleteFromCloudinary(project.image);
+        projects = projects.filter((p) => p.id !== req.params.id);
+        writeJSON('portfolio.json', projects);
+        if (global.io) global.io.emit('content_updated', { section: 'portfolio', action: 'delete', data: { id: req.params.id } });
+        res.json({ message: 'Project deleted' });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -345,11 +416,7 @@ app.delete('/api/blogs/:id', authenticate, async (req, res) => {
         if (useDB) {
             const blog = await Blog.findByIdAndDelete(req.params.id);
             if (!blog) return res.status(404).json({ error: 'Blog not found' });
-            if (blog.image && blog.image.includes('/uploads/')) {
-                const fn = blog.image.split('/uploads/')[1];
-                const fp = path.join(uploadsDir, fn);
-                if (fs.existsSync(fp)) fs.unlinkSync(fp);
-            }
+            await deleteFromCloudinary(blog.image);
             const all = await Blog.find().sort({ createdAt: -1 });
             if (global.io) global.io.emit('content_updated', { section: 'blogs', action: 'delete', data: { id: req.params.id }, allBlogs: all });
             return res.json({ message: 'Blog deleted' });
@@ -357,11 +424,7 @@ app.delete('/api/blogs/:id', authenticate, async (req, res) => {
         let blogs = readJSON('blogs.json');
         const blog = blogs.find((b) => b.id === req.params.id);
         if (!blog) return res.status(404).json({ error: 'Blog not found' });
-        if (blog.image && blog.image.includes('/uploads/')) {
-            const fn = blog.image.split('/uploads/')[1];
-            const fp = path.join(uploadsDir, fn);
-            if (fs.existsSync(fp)) fs.unlinkSync(fp);
-        }
+        await deleteFromCloudinary(blog.image);
         blogs = blogs.filter((b) => b.id !== req.params.id);
         writeJSON('blogs.json', blogs);
         if (global.io) global.io.emit('content_updated', { section: 'blogs', action: 'delete', data: { id: req.params.id }, allBlogs: blogs });
@@ -444,25 +507,115 @@ app.get('/api/stats', authenticate, async (req, res) => {
 });
 
 // ============================
+// BOOKS ROUTES
+// ============================
+app.get('/api/books', async (req, res) => {
+    try {
+        if (useDB) return res.json(await Book.find().sort({ createdAt: -1 }));
+        res.json(readJSON('books.json'));
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/books/featured', async (req, res) => {
+    try {
+        if (useDB) return res.json(await Book.find({ featured: true }).sort({ createdAt: -1 }).limit(4));
+        const books = readJSON('books.json');
+        res.json(books.filter(b => b.featured).slice(0, 4));
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/books/:id', async (req, res) => {
+    try {
+        if (useDB) {
+            const book = await Book.findById(req.params.id);
+            if (!book) return res.status(404).json({ error: 'Book not found' });
+            return res.json(book);
+        }
+        const books = readJSON('books.json');
+        const book = books.find(b => b.id === req.params.id);
+        if (!book) return res.status(404).json({ error: 'Book not found' });
+        res.json(book);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/books', authenticate, async (req, res) => {
+    try {
+        if (useDB) {
+            const book = await Book.create(req.body);
+            if (global.io) global.io.emit('content_updated', { section: 'books', action: 'create', data: book });
+            return res.status(201).json(book);
+        }
+        const books = readJSON('books.json');
+        const newBook = { id: uuidv4(), ...req.body, createdAt: new Date().toISOString() };
+        books.unshift(newBook);
+        writeJSON('books.json', books);
+        if (global.io) global.io.emit('content_updated', { section: 'books', action: 'create', data: newBook });
+        res.status(201).json(newBook);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.put('/api/books/:id', authenticate, async (req, res) => {
+    try {
+        if (useDB) {
+            const book = await Book.findByIdAndUpdate(req.params.id, req.body, { new: true });
+            if (!book) return res.status(404).json({ error: 'Book not found' });
+            if (global.io) global.io.emit('content_updated', { section: 'books', action: 'update', data: book });
+            return res.json(book);
+        }
+        const books = readJSON('books.json');
+        const idx = books.findIndex(b => b.id === req.params.id);
+        if (idx === -1) return res.status(404).json({ error: 'Book not found' });
+        books[idx] = { ...books[idx], ...req.body };
+        writeJSON('books.json', books);
+        if (global.io) global.io.emit('content_updated', { section: 'books', action: 'update', data: books[idx] });
+        res.json(books[idx]);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/books/:id', authenticate, async (req, res) => {
+    try {
+        if (useDB) {
+            const book = await Book.findByIdAndDelete(req.params.id);
+            if (!book) return res.status(404).json({ error: 'Book not found' });
+            await deleteFromCloudinary(book.coverImage);
+            if (global.io) global.io.emit('content_updated', { section: 'books', action: 'delete', data: { id: req.params.id } });
+            return res.json({ message: 'Book deleted' });
+        }
+        let books = readJSON('books.json');
+        const book = books.find(b => b.id === req.params.id);
+        if (!book) return res.status(404).json({ error: 'Book not found' });
+        await deleteFromCloudinary(book.coverImage);
+        books = books.filter(b => b.id !== req.params.id);
+        writeJSON('books.json', books);
+        if (global.io) global.io.emit('content_updated', { section: 'books', action: 'delete', data: { id: req.params.id } });
+        res.json({ message: 'Book deleted' });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ============================
 // GET ALL CONTENT
 // ============================
 app.get('/api/content/all', authenticate, async (req, res) => {
     try {
-        const [home, about, qualification, skills] = await Promise.all([
+        const [home, about, qualification, skills, contactInfo] = await Promise.all([
             getSection('home'),
             getSection('about'),
             getSection('qualification'),
             getSection('skills'),
+            getSection('contactInfo'),
         ]);
-        let blogs, contacts;
+        let blogs, contacts, books;
         if (useDB) {
             blogs = await Blog.find().sort({ createdAt: -1 });
             contacts = await Contact.find().sort({ createdAt: -1 });
+            books = await Book.find().sort({ createdAt: -1 });
         } else {
             blogs = readJSON('blogs.json');
             contacts = readJSON('contacts.json');
+            books = readJSON('books.json');
         }
-        res.json({ home, about, qualification, skills, blogs, contacts });
+        const portfolio = readJSON('portfolio.json');
+        res.json({ home, about, qualification, skills, contactInfo, blogs, contacts, portfolio, books });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

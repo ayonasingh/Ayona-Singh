@@ -147,5 +147,15 @@
         "level": "Intermediate"
       }
     ]
+  },
+  "contactInfo": {
+    "email": "ayona.singh@email.com",
+    "phone": "+91 XXXXXXXXXX",
+    "whatsapp": "91XXXXXXXXXX",
+    "linkedin": "https://www.linkedin.com/in/ayona-singh-10b5561b8/",
+    "github": "https://github.com/",
+    "instagram": "https://www.instagram.com/",
+    "cvLink": "",
+    "location": "New Delhi, India"
   }
 }

@@ -1188,3 +1188,195 @@ body.dark-theme .lp-skills {
         display: none;
     }
 }
+
+/*====================================================
+  BOOKS SECTION (Homepage)
+====================================================*/
+.lp-books {
+    padding: 5rem 0;
+    background: hsl(var(--hue-color), 60%, 99%);
+}
+
+body.dark-theme .lp-books {
+    background: hsl(var(--hue-color), 28%, 10%);
+}
+
+.lp-books .lp-section__header {
+    max-width: 968px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 1.5rem;
+}
+
+.lp-books__grid {
+    max-width: 968px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Book Card */
+.lp-book-card {
+    background: var(--container-color);
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+.lp-book-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.14);
+}
+
+.lp-book-card__cover-link {
+    position: relative;
+    display: block;
+    height: 190px;
+    overflow: hidden;
+}
+
+.lp-book-card__cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s;
+}
+
+.lp-book-card:hover .lp-book-card__cover {
+    transform: scale(1.06);
+}
+
+.lp-book-card__cover-shine {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(10, 5, 30, 0.55) 0%, transparent 55%);
+    pointer-events: none;
+}
+
+.lp-book-card__body {
+    padding: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.lp-book-card__genre {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--first-color);
+    background: hsl(var(--hue-color), 69%, 94%);
+    padding: 0.18rem 0.65rem;
+    border-radius: 999px;
+    margin-bottom: 0.55rem;
+    display: inline-block;
+    font-family: var(--body-font);
+    letter-spacing: 0.3px;
+}
+
+.lp-book-card__title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--title-color);
+    line-height: 1.35;
+    margin-bottom: 0.2rem;
+    font-family: var(--body-font);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+    overflow: hidden;
+}
+
+.lp-book-card__title a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.lp-book-card__title a:hover {
+    color: var(--first-color);
+}
+
+.lp-book-card__author {
+    font-size: 0.78rem;
+    color: var(--text-color-light);
+    font-style: italic;
+    margin-bottom: 0.45rem;
+    font-family: var(--body-font);
+}
+
+.lp-book-card__stars {
+    font-size: 0.95rem;
+    letter-spacing: 1.5px;
+    margin-bottom: 0.55rem;
+}
+
+.lp-book-card__excerpt {
+    font-size: 0.82rem;
+    color: var(--text-color);
+    line-height: 1.6;
+    flex: 1;
+    margin-bottom: 0.85rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    line-clamp: 3;
+    overflow: hidden;
+    font-family: var(--body-font);
+}
+
+.lp-book-card__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+    margin-top: auto;
+    padding-top: 0.65rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.lp-book-card__review {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--first-color);
+    text-decoration: none;
+    font-family: var(--body-font);
+    transition: letter-spacing 0.2s;
+}
+
+.lp-book-card__review:hover {
+    letter-spacing: 0.5px;
+}
+
+.lp-book-card__dl {
+    margin-left: auto;
+    font-size: 0.78rem;
+    background: var(--first-color);
+    color: #fff;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-family: var(--body-font);
+    font-weight: 600;
+    transition: transform 0.2s;
+}
+
+.lp-book-card__dl:hover {
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .lp-books__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .lp-books__grid {
+        grid-template-columns: 1fr;
+    }
+}
