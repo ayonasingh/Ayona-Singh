@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat System Test</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        input, button {
+            margin: 5px;
+            padding: 8px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .message {
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+        .sent {
+            background: #e3f2fd;
+            text-align: right;
+        }
+        .received {
+            background: #f5f5f5;
+        }
+        .status {
+            color: #666;
+            font-size: 12px;
+            margin: 5px 0;
+        }
+        .online {
+            color: green;
+        }
+        .offline {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chat System Test</h1>
+
+    <div class="section">
+        <h2>1. Register User</h2>
+        <input type="text" id="regUsername" placeholder="Username">
+        <input type="email" id="regEmail" placeholder="Email">
+        <input type="password" id="regPassword" placeholder="Password">
+        <button onclick="register()">Register</button>
+    </div>
+
+    <div class="section">
+        <h2>2. Login</h2>
+        <input type="email" id="loginEmail" placeholder="Email">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <button onclick="login()">Login</button>
+        <div class="status" id="loginStatus"></div>
+    </div>
+
+    <div class="section">
+        <h2>3. Chat</h2>
+        <div class="status">
+            Socket Status: <span id="socketStatus" class="offline">Disconnected</span>
+        </div>
+        <div class="status">
+            Admin Status: <span id="adminStatus" class="offline">Offline</span>
+        </div>
+        <div class="status" id="typingStatus"></div>
+        
+        <div id="messages"></div>
+        
+        <input type="text" id="messageInput" placeholder="Type a message..." style="width: 70%">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000';
+        let socket = null;
+        let token = null;
+        let userId = null;
+        let adminId = '61b7e9f9-fb15-4f6b-af25-ab5be6984b42'; // From create-admin script
+
+        async function register() {
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/api/users/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert('Registration successful! You can now login.');
+                    document.getElementById('loginEmail').value = email;
+                    document.getElementById('loginPassword').value = password;
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/api/users/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    token = data.token;
+                    userId = data.user.id;
+                    document.getElementById('loginStatus').innerHTML = 
+                        `✅ Logged in as ${data.user.username}`;
+                    connectSocket();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function connectSocket() {
+            socket = io(API_URL);
+
+            socket.on('connect', () => {
+                console.log('Socket connected');
+                socket.emit('authenticate', token);
+            });
+
+            socket.on('authenticated', (data) => {
+                console.log('Authenticated:', data);
+                document.getElementById('socketStatus').textContent = 'Connected';
+                document.getElementById('socketStatus').className = 'online';
+            });
+
+            socket.on('new_message', (message) => {
+                console.log('New message:', message);
+                displayMessage(message, false);
+            });
+
+            socket.on('message_sent', (message) => {
+                console.log('Message sent:', message);
+                displayMessage(message, true);
+            });
+
+            socket.on('user_online', (data) => {
+                if (data.userId === adminId) {
+                    document.getElementById('adminStatus').textContent = 'Online';
+                    document.getElementById('adminStatus').className = 'online';
+                }
+            });
+
+            socket.on('user_offline', (data) => {
+                if (data.userId === adminId) {
+                    document.getElementById('adminStatus').textContent = 'Offline';
+                    document.getElementById('adminStatus').className = 'offline';
+                }
+            });
+
+            socket.on('typing', (data) => {
+                document.getElementById('typingStatus').textContent = 'Admin is typing...';
+            });
+
+            socket.on('stop_typing', (data) => {
+                document.getElementById('typingStatus').textContent = '';
+            });
+
+            socket.on('error', (data) => {
+                alert('Socket error: ' + data.message);
+            });
+        }
+
+        function sendMessage() {
+            const content = document.getElementById('messageInput').value;
+            if (!content.trim()) return;
+
+            if (!socket || !token) {
+                alert('Please login first');
+                return;
+            }
+
+            socket.emit('send_message', {
+                receiverId: adminId,
+                content: content
+            });
+
+            document.getElementById('messageInput').value = '';
+        }
+
+        function displayMessage(message, isSent) {
+            const messagesDiv = document.getElementById('messages');
+            const messageEl = document.createElement('div');
+            messageEl.className = 'message ' + (isSent ? 'sent' : 'received');
+            messageEl.textContent = message.content;
+            messagesDiv.appendChild(messageEl);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Typing indicators
+        let typingTimeout;
+        document.getElementById('messageInput')?.addEventListener('input', () => {
+            if (!socket) return;
+            
+            socket.emit('typing_start', { receiverId: adminId });
+            
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                socket.emit('typing_stop', { receiverId: adminId });
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

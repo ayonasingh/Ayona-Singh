@@ -1,0 +1,51 @@
+/*==================== PAGES SHARED LAYOUT ====================*/
+/* Every page gets a top padding since header is now at the top */
+.page-wrapper {
+    padding-top: 4.5rem;
+    min-height: 100vh;
+}
+
+/* Page hero banner */
+.page-hero {
+    background: linear-gradient(135deg,
+            hsl(var(--hue-color), 69%, 61%) 0%,
+            hsl(var(--hue-color), 57%, 53%) 100%);
+    padding: 3rem 0 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.page-hero__title {
+    font-size: var(--h1-font-size);
+    color: #fff;
+    font-family: var(--body-font);
+    font-weight: var(--font-semi-bold);
+    margin-bottom: .25rem;
+}
+
+.page-hero__subtitle {
+    font-size: var(--small-font-size);
+    color: rgba(255, 255, 255, 0.82);
+    font-family: var(--body-font);
+}
+
+.page-hero__breadcrumb {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: .5rem;
+    margin-top: .75rem;
+    font-size: var(--smaller-font-size);
+    color: rgba(255, 255, 255, 0.7);
+    font-family: var(--body-font);
+}
+
+.page-hero__breadcrumb a {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    transition: color .2s;
+}
+
+.page-hero__breadcrumb a:hover {
+    color: #fff;
+}

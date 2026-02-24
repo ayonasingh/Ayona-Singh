@@ -1,0 +1,72 @@
+/* ===== Admin Modal ===== */
+.admin-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem;
+    overflow-y: auto;
+}
+
+.admin-modal {
+    background: hsl(250, 29%, 11%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.25rem;
+    width: 100%;
+    max-width: 640px;
+    animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+    flex-shrink: 0;
+}
+
+@keyframes modalIn {
+    from {
+        transform: translateY(-20px) scale(0.97);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.admin-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-modal__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: hsl(250, 8%, 88%);
+}
+
+.admin-modal__close {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.5rem;
+    color: hsl(250, 8%, 55%);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.3rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.admin-modal__close:hover {
+    background: rgba(255, 80, 80, 0.15);
+    color: #ff6b6b;
+    border-color: rgba(255, 80, 80, 0.25);
+}
+
+.admin-modal__body {
+    padding: 1.5rem;
+}

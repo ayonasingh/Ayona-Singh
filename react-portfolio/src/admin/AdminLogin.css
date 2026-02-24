@@ -1,0 +1,181 @@
+/* ===== Admin Login Page ===== */
+.admin-login {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background: hsl(250, 28%, 8%);
+    padding: 2rem 1rem;
+    padding-top: 2rem;
+    /* override body padding */
+}
+
+.admin-login__bg {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 20% 30%, hsl(250, 69%, 30%) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, hsl(280, 69%, 25%) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.admin-login__card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 1.5rem;
+    padding: 3rem 2.5rem;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+    animation: loginSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes loginSlideIn {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.admin-login__logo {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.admin-login__logo-icon {
+    display: inline-block;
+    font-size: 2.5rem;
+    color: hsl(250, 69%, 70%);
+    animation: rotateStar 4s linear infinite;
+}
+
+@keyframes rotateStar {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.admin-login__title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0.5rem 0 0.25rem;
+}
+
+.admin-login__subtitle {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.admin-login__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.admin-login__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.admin-login__label {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.admin-login__input {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.938rem;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 0.75rem;
+    color: #fff;
+    padding: 0.85rem 1.1rem;
+    outline: none;
+    transition: border-color 0.3s, background 0.3s;
+    width: 100%;
+}
+
+.admin-login__input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.admin-login__input:focus {
+    border-color: hsl(250, 69%, 61%);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.admin-login__btn {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.938rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, hsl(250, 69%, 61%), hsl(280, 69%, 61%));
+    color: #fff;
+    border: none;
+    border-radius: 0.75rem;
+    padding: 0.95rem;
+    cursor: pointer;
+    transition: opacity 0.3s, transform 0.2s;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.admin-login__btn:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.admin-login__btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.admin-login__spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.admin-login__hint {
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.35);
+    margin-top: 1.5rem;
+}
+
+.admin-login__hint strong {
+    color: rgba(255, 255, 255, 0.6);
+}

@@ -1,0 +1,26 @@
+[
+    {
+        "id": "p1",
+        "title": "Statistical Analysis Project",
+        "description": "Analyzed real-world datasets using descriptive and inferential statistics with Python and Excel.",
+        "image": "",
+        "link": "#",
+        "createdAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+        "id": "p2",
+        "title": "Linear Algebra Research",
+        "description": "Explored matrix transformations, eigenvalues, and their applications in real-world problems.",
+        "image": "",
+        "link": "#",
+        "createdAt": "2026-01-05T00:00:00.000Z"
+    },
+    {
+        "id": "p3",
+        "title": "Calculus & Modeling",
+        "description": "Built mathematical models using differential equations to simulate population and growth dynamics.",
+        "image": "",
+        "link": "#",
+        "createdAt": "2026-01-10T00:00:00.000Z"
+    }
+]

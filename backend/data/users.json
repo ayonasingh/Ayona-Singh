@@ -1,0 +1,11 @@
+[
+  {
+    "id": "61b7e9f9-fb15-4f6b-af25-ab5be6984b42",
+    "username": "admin",
+    "email": "admin@portfolio.com",
+    "password": "$2b$10$32gUf2WDJh6ym7l46p1UEe5lqbP8OOIJ4dWs6duH6G1W9n03m38Ie",
+    "role": "admin",
+    "createdAt": "2026-02-21T20:43:40.514Z",
+    "lastLogin": "2026-02-21T20:43:40.515Z"
+  }
+]

@@ -1,0 +1,35 @@
+[
+    {
+        "id": "b1",
+        "tag": "Calculus",
+        "date": "Feb 10, 2026",
+        "readTime": "5 min read",
+        "title": "Understanding Limits & Continuity in Real Analysis",
+        "excerpt": "Limits are the backbone of calculus. In this post I break down what limits really mean, how to evaluate them, and why continuity matters so much in analysis.",
+        "image": "",
+        "link": "#",
+        "createdAt": "2026-02-10T00:00:00.000Z"
+    },
+    {
+        "id": "b2",
+        "tag": "Statistics",
+        "date": "Jan 28, 2026",
+        "readTime": "6 min read",
+        "title": "Demystifying Probability Distributions for Beginners",
+        "excerpt": "From Binomial to Normal — understanding probability distributions can feel overwhelming. Here's a simple, visual guide to the most common ones used in statistics.",
+        "image": "",
+        "link": "#",
+        "createdAt": "2026-01-28T00:00:00.000Z"
+    },
+    {
+        "id": "b3",
+        "tag": "Linear Algebra",
+        "date": "Jan 15, 2026",
+        "readTime": "7 min read",
+        "title": "Eigenvalues, Eigenvectors & Why They Matter",
+        "excerpt": "Eigenvalues are everywhere — from Google's PageRank to quantum mechanics. Let's explore what they are, how to compute them, and their real-world applications.",
+        "image": "",
+        "link": "#",
+        "createdAt": "2026-01-15T00:00:00.000Z"
+    }
+]
