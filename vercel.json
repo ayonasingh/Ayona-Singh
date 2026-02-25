@@ -1,15 +1,13 @@
 {
-  "version": 2,
-  "buildCommand": "npm run build",
+  "buildCommand": "cd react-portfolio && npm install && npm run build",
   "outputDirectory": "react-portfolio/dist",
-  "installCommand": "npm install",
+  "installCommand": "cd backend && npm install",
   "framework": null,
-  "builds": [
-    {
-      "src": "api/index.js",
-      "use": "@vercel/node"
+  "functions": {
+    "api/index.js": {
+      "runtime": "nodejs20.x"
     }
-  ],
+  },
   "rewrites": [
     {
       "source": "/api/:path*",
