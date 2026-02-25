@@ -3,8 +3,7 @@ import './About.css';
 import AboutImgFallback from '../../assets/ayona_about.jpg';
 import { BiFileBlank, BiAward, BiBookOpen, BiCalculator } from 'react-icons/bi';
 import axios from 'axios';
-
-const BASE_URL = 'http://localhost:5000/api';
+import BASE_URL from '../../config/api';
 
 const ICON_MAP = {
     BiAward: <BiAward className="about__icon" />,

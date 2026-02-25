@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './Skills.css';
 import { BiBadgeCheck } from 'react-icons/bi';
 import axios from 'axios';
-
-const BASE_URL = 'http://localhost:5000/api';
+import BASE_URL from '../../config/api';
 
 const DEFAULT_MATH = [
     { id: 's1', name: 'Calculus', level: 'Advanced' },

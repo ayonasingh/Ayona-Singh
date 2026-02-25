@@ -7,8 +7,7 @@ import Img2 from '../../assets/portfolio2.jpg';
 import Img3 from '../../assets/portfolio3.jpg';
 import AyonaAbout from '../../assets/ayona_about.jpg';
 import axios from 'axios';
-
-const BASE_URL = 'http://localhost:5000/api';
+import BASE_URL from '../../config/api';
 
 const FALLBACK_IMGS = [Img1, Img2, Img3, AyonaAbout, Img1, Img2];
 

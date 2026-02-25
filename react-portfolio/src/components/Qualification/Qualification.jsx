@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Qualification.css';
 import { BiBriefcaseAlt, BiCalendar, BiBook } from "react-icons/bi";
 import axios from 'axios';
-
-const BASE_URL = 'http://localhost:5000/api';
+import BASE_URL from '../../config/api';
 
 const Qualification = () => {
     const [toggleState, setToggleState] = useState(1);
