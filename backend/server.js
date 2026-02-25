@@ -653,16 +653,22 @@ initializeSocket(io);
 // Start Server
 // ============================
 connectDB().then(() => {
-    server.listen(PORT, () => {
-        console.log(`\n✅ Portfolio Backend running at http://localhost:${PORT}`);
-        console.log(`🗄️  Database: ${useDB ? 'MongoDB Atlas' : 'JSON Files (fallback)'}`);
-        console.log(`📁 Data dir: ${dataDir}`);
-        console.log(`🖼️  Uploads: ${uploadsDir}`);
-        console.log(`💬 Chat system: Socket.IO enabled`);
-        console.log(`\n🔑 Admin Login: username=${ADMIN_USERNAME}  password=${ADMIN_PASSWORD}`);
-        if (!MONGO_URI) {
-            console.log(`\n💡 To enable MongoDB, add MONGO_URI to your .env file`);
-            console.log(`   Get a free DB at: https://mongodb.com/atlas`);
-        }
-    });
+    // Only start server if not in Vercel serverless environment
+    if (process.env.VERCEL !== '1') {
+        server.listen(PORT, () => {
+            console.log(`\n✅ Portfolio Backend running at http://localhost:${PORT}`);
+            console.log(`🗄️  Database: ${useDB ? 'MongoDB Atlas' : 'JSON Files (fallback)'}`);
+            console.log(`📁 Data dir: ${dataDir}`);
+            console.log(`🖼️  Uploads: ${uploadsDir}`);
+            console.log(`💬 Chat system: Socket.IO enabled`);
+            console.log(`\n🔑 Admin Login: username=${ADMIN_USERNAME}  password=${ADMIN_PASSWORD}`);
+            if (!MONGO_URI) {
+                console.log(`\n💡 To enable MongoDB, add MONGO_URI to your .env file`);
+                console.log(`   Get a free DB at: https://mongodb.com/atlas`);
+            }
+        });
+    }
 });
+
+// Export for Vercel serverless
+module.exports = app;

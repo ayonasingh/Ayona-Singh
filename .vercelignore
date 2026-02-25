@@ -1,0 +1,10 @@
+node_modules
+.git
+.env
+backend/node_modules
+backend/uploads
+backend/data
+react-portfolio/node_modules
+react-portfolio/.env
+*.log
+.DS_Store

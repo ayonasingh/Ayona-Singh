@@ -2,6 +2,10 @@
   "version": 2,
   "builds": [
     {
+      "src": "api/index.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "react-portfolio/package.json",
       "use": "@vercel/static-build",
       "config": {
@@ -11,8 +15,19 @@
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/uploads/(.*)",
+      "dest": "/api/index.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/react-portfolio/dist/$1"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
