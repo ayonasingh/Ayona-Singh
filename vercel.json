@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "react-portfolio/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "react-portfolio/dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/react-portfolio/dist/$1"
+    }
+  ]
+}
