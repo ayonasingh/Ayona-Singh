@@ -1,8 +1,7 @@
 {
-  "buildCommand": "cd react-portfolio && npm install && npm run build",
-  "outputDirectory": "react-portfolio/dist",
-  "installCommand": "cd backend && npm install",
-  "framework": null,
+  "buildCommand": "cd react-portfolio && npm ci && npm run build && cd .. && mkdir -p dist && cp -r react-portfolio/dist/* dist/",
+  "outputDirectory": "dist",
+  "installCommand": "cd backend && npm ci",
   "functions": {
     "api/index.js": {
       "runtime": "nodejs20.x"
