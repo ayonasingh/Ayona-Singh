@@ -1,19 +1,25 @@
 {
-  "buildCommand": "cd react-portfolio && npm install && npm run build",
-  "outputDirectory": "react-portfolio/dist",
-  "installCommand": "cd backend && npm install",
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
+      "src": "react-portfolio/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.js"
     },
     {
-      "source": "/uploads/(.*)",
-      "destination": "/api/index.js"
+      "handle": "filesystem"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/(.*)",
+      "dest": "/react-portfolio/dist/index.html"
     }
   ]
 }
