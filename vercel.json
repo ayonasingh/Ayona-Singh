@@ -19,8 +19,11 @@
       "dest": "/api/index.js"
     },
     {
+      "handle": "filesystem"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/react-portfolio/dist/$1"
+      "dest": "/react-portfolio/dist/index.html"
     }
   ]
 }
