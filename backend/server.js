@@ -1,9 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
 const cors = require('cors');
-// multer is loaded via Cloudinary config
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
@@ -11,15 +8,6 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: process.env.SOCKET_CORS_ORIGIN || 'http://localhost:5173',
-        credentials: true
-    }
-});
-
-global.io = io;
 
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'ayona_admin_secret_2026';
@@ -209,7 +197,6 @@ app.post('/api/upload', authenticate, (req, res, next) => {
     upload.single('image')(req, res, (err) => {
         if (err) return res.status(400).json({ error: err.message });
         if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-        // Cloudinary returns the URL in req.file.path
         const url = req.file.path;
         const publicId = req.file.filename;
         res.json({ url, publicId });
@@ -227,7 +214,6 @@ app.get('/api/home', async (req, res) => {
 app.put('/api/home', authenticate, async (req, res) => {
     try {
         const data = await setSection('home', req.body);
-        if (global.io) global.io.emit('content_updated', { section: 'home', data });
         res.json(data);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -243,7 +229,6 @@ app.get('/api/about', async (req, res) => {
 app.put('/api/about', authenticate, async (req, res) => {
     try {
         const data = await setSection('about', req.body);
-        if (global.io) global.io.emit('content_updated', { section: 'about', data });
         res.json(data);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -259,7 +244,6 @@ app.get('/api/qualification', async (req, res) => {
 app.put('/api/qualification', authenticate, async (req, res) => {
     try {
         const data = await setSection('qualification', req.body);
-        if (global.io) global.io.emit('content_updated', { section: 'qualification', data });
         res.json(data);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -275,7 +259,6 @@ app.get('/api/skills', async (req, res) => {
 app.put('/api/skills', authenticate, async (req, res) => {
     try {
         const data = await setSection('skills', req.body);
-        if (global.io) global.io.emit('content_updated', { section: 'skills', data });
         res.json(data);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -291,7 +274,6 @@ app.get('/api/contact-info', async (req, res) => {
 app.put('/api/contact-info', authenticate, async (req, res) => {
     try {
         const data = await setSection('contactInfo', req.body);
-        if (global.io) global.io.emit('content_updated', { section: 'contactInfo', data });
         res.json(data);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -321,7 +303,6 @@ app.post('/api/portfolio', authenticate, async (req, res) => {
         const newProject = { id: uuidv4(), ...req.body, createdAt: new Date().toISOString() };
         projects.unshift(newProject);
         writeJSON('portfolio.json', projects);
-        if (global.io) global.io.emit('content_updated', { section: 'portfolio', action: 'create', data: newProject });
         res.status(201).json(newProject);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -333,7 +314,6 @@ app.put('/api/portfolio/:id', authenticate, async (req, res) => {
         if (index === -1) return res.status(404).json({ error: 'Project not found' });
         projects[index] = { ...projects[index], ...req.body };
         writeJSON('portfolio.json', projects);
-        if (global.io) global.io.emit('content_updated', { section: 'portfolio', action: 'update', data: projects[index] });
         res.json(projects[index]);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -346,7 +326,6 @@ app.delete('/api/portfolio/:id', authenticate, async (req, res) => {
         await deleteFromCloudinary(project.image);
         projects = projects.filter((p) => p.id !== req.params.id);
         writeJSON('portfolio.json', projects);
-        if (global.io) global.io.emit('content_updated', { section: 'portfolio', action: 'delete', data: { id: req.params.id } });
         res.json({ message: 'Project deleted' });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -379,15 +358,12 @@ app.post('/api/blogs', authenticate, async (req, res) => {
     try {
         if (useDB) {
             const blog = await Blog.create(req.body);
-            const all = await Blog.find().sort({ createdAt: -1 });
-            if (global.io) global.io.emit('content_updated', { section: 'blogs', action: 'create', data: blog, allBlogs: all });
             return res.status(201).json(blog);
         }
         const blogs = readJSON('blogs.json');
         const newBlog = { id: uuidv4(), ...req.body, createdAt: new Date().toISOString() };
         blogs.unshift(newBlog);
         writeJSON('blogs.json', blogs);
-        if (global.io) global.io.emit('content_updated', { section: 'blogs', action: 'create', data: newBlog, allBlogs: blogs });
         res.status(201).json(newBlog);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -397,8 +373,6 @@ app.put('/api/blogs/:id', authenticate, async (req, res) => {
         if (useDB) {
             const blog = await Blog.findByIdAndUpdate(req.params.id, req.body, { new: true });
             if (!blog) return res.status(404).json({ error: 'Blog not found' });
-            const all = await Blog.find().sort({ createdAt: -1 });
-            if (global.io) global.io.emit('content_updated', { section: 'blogs', action: 'update', data: blog, allBlogs: all });
             return res.json(blog);
         }
         const blogs = readJSON('blogs.json');
@@ -406,7 +380,6 @@ app.put('/api/blogs/:id', authenticate, async (req, res) => {
         if (index === -1) return res.status(404).json({ error: 'Blog not found' });
         blogs[index] = { ...blogs[index], ...req.body };
         writeJSON('blogs.json', blogs);
-        if (global.io) global.io.emit('content_updated', { section: 'blogs', action: 'update', data: blogs[index], allBlogs: blogs });
         res.json(blogs[index]);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -417,8 +390,6 @@ app.delete('/api/blogs/:id', authenticate, async (req, res) => {
             const blog = await Blog.findByIdAndDelete(req.params.id);
             if (!blog) return res.status(404).json({ error: 'Blog not found' });
             await deleteFromCloudinary(blog.image);
-            const all = await Blog.find().sort({ createdAt: -1 });
-            if (global.io) global.io.emit('content_updated', { section: 'blogs', action: 'delete', data: { id: req.params.id }, allBlogs: all });
             return res.json({ message: 'Blog deleted' });
         }
         let blogs = readJSON('blogs.json');
@@ -427,7 +398,6 @@ app.delete('/api/blogs/:id', authenticate, async (req, res) => {
         await deleteFromCloudinary(blog.image);
         blogs = blogs.filter((b) => b.id !== req.params.id);
         writeJSON('blogs.json', blogs);
-        if (global.io) global.io.emit('content_updated', { section: 'blogs', action: 'delete', data: { id: req.params.id }, allBlogs: blogs });
         res.json({ message: 'Blog deleted' });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -542,14 +512,12 @@ app.post('/api/books', authenticate, async (req, res) => {
     try {
         if (useDB) {
             const book = await Book.create(req.body);
-            if (global.io) global.io.emit('content_updated', { section: 'books', action: 'create', data: book });
             return res.status(201).json(book);
         }
         const books = readJSON('books.json');
         const newBook = { id: uuidv4(), ...req.body, createdAt: new Date().toISOString() };
         books.unshift(newBook);
         writeJSON('books.json', books);
-        if (global.io) global.io.emit('content_updated', { section: 'books', action: 'create', data: newBook });
         res.status(201).json(newBook);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -559,7 +527,6 @@ app.put('/api/books/:id', authenticate, async (req, res) => {
         if (useDB) {
             const book = await Book.findByIdAndUpdate(req.params.id, req.body, { new: true });
             if (!book) return res.status(404).json({ error: 'Book not found' });
-            if (global.io) global.io.emit('content_updated', { section: 'books', action: 'update', data: book });
             return res.json(book);
         }
         const books = readJSON('books.json');
@@ -567,7 +534,6 @@ app.put('/api/books/:id', authenticate, async (req, res) => {
         if (idx === -1) return res.status(404).json({ error: 'Book not found' });
         books[idx] = { ...books[idx], ...req.body };
         writeJSON('books.json', books);
-        if (global.io) global.io.emit('content_updated', { section: 'books', action: 'update', data: books[idx] });
         res.json(books[idx]);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -578,7 +544,6 @@ app.delete('/api/books/:id', authenticate, async (req, res) => {
             const book = await Book.findByIdAndDelete(req.params.id);
             if (!book) return res.status(404).json({ error: 'Book not found' });
             await deleteFromCloudinary(book.coverImage);
-            if (global.io) global.io.emit('content_updated', { section: 'books', action: 'delete', data: { id: req.params.id } });
             return res.json({ message: 'Book deleted' });
         }
         let books = readJSON('books.json');
@@ -587,7 +552,6 @@ app.delete('/api/books/:id', authenticate, async (req, res) => {
         await deleteFromCloudinary(book.coverImage);
         books = books.filter(b => b.id !== req.params.id);
         writeJSON('books.json', books);
-        if (global.io) global.io.emit('content_updated', { section: 'books', action: 'delete', data: { id: req.params.id } });
         res.json({ message: 'Book deleted' });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -631,7 +595,7 @@ app.get('/api/db-status', authenticate, (req, res) => {
 });
 
 // ============================
-// CHAT SYSTEM ROUTES
+// CHAT SYSTEM ROUTES (Without Socket.IO)
 // ============================
 const userRoutes = require('./routes/userRoutes');
 const messageRoutes = require('./routes/messageRoutes');
@@ -644,23 +608,15 @@ app.use('/api/conversations', conversationRoutes);
 app.use('/api/admin', adminRoutes);
 
 // ============================
-// Initialize Socket.IO
-// ============================
-const initializeSocket = require('./socket/chatSocket');
-initializeSocket(io);
-
-// ============================
-// Start Server
+// Start Server (Local Development Only)
 // ============================
 connectDB().then(() => {
-    // Only start server if not in Vercel serverless environment
-    if (process.env.VERCEL !== '1') {
-        server.listen(PORT, () => {
+    if (process.env.VERCEL !== '1' && require.main === module) {
+        app.listen(PORT, () => {
             console.log(`\n✅ Portfolio Backend running at http://localhost:${PORT}`);
             console.log(`🗄️  Database: ${useDB ? 'MongoDB Atlas' : 'JSON Files (fallback)'}`);
             console.log(`📁 Data dir: ${dataDir}`);
             console.log(`🖼️  Uploads: ${uploadsDir}`);
-            console.log(`💬 Chat system: Socket.IO enabled`);
             console.log(`\n🔑 Admin Login: username=${ADMIN_USERNAME}  password=${ADMIN_PASSWORD}`);
             if (!MONGO_URI) {
                 console.log(`\n💡 To enable MongoDB, add MONGO_URI to your .env file`);
