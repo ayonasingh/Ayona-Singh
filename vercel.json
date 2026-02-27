@@ -1,23 +1,18 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "installCommand": "npm install",
-  "functions": {
-    "api/index.js": {
-      "runtime": "nodejs20.x"
-    }
-  },
+  "buildCommand": "cd react-portfolio && npm install && npm run build",
+  "outputDirectory": "react-portfolio/dist",
+  "installCommand": "cd backend && npm install",
   "rewrites": [
     {
-      "source": "/api/:path*",
+      "source": "/api/(.*)",
       "destination": "/api/index.js"
     },
     {
-      "source": "/uploads/:path*",
+      "source": "/uploads/(.*)",
       "destination": "/api/index.js"
     },
     {
-      "source": "/socket.io/:path*",
+      "source": "/socket.io/(.*)",
       "destination": "/api/index.js"
     },
     {
