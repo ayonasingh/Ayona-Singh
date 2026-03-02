@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "start": "cd backend && npm start",
-    "build": "cd backend && npm install",
+    "build": "cd react-portfolio && npm install && npm run build",
     "dev:backend": "cd backend && npm start",
-    "dev:frontend": "cd react-portfolio && npm run dev"
+    "dev:frontend": "cd react-portfolio && npm run dev",
+    "install:all": "npm install && cd backend && npm install && cd ../react-portfolio && npm install"
   },
   "engines": {
     "node": ">=18.x"

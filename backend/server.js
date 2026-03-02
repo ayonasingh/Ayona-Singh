@@ -17,7 +17,29 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const MONGO_URI = process.env.MONGO_URI || '';
 
 // ===== Middleware =====
-app.use(cors({ origin: FRONTEND_URL, credentials: true }));
+// CORS configuration - allow multiple origins for Vercel
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5000',
+    process.env.FRONTEND_URL,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null
+].filter(Boolean);
+
+app.use(cors({ 
+    origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, Postman, etc.)
+        if (!origin) return callback(null, true);
+        
+        // Allow any Vercel deployment URL
+        if (origin.includes('.vercel.app')) return callback(null, true);
+        
+        // Check against allowed origins
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+        
+        callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true 
+}));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
