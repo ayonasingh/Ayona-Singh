@@ -20,13 +20,7 @@ const verifyToken = (token) => {
     }
 };
 
-// Authenticate socket connection
-const authenticateSocket = (token) => {
-    return verifyToken(token);
-};
-
 module.exports = {
     generateToken,
-    verifyToken,
-    authenticateSocket
+    verifyToken
 };
