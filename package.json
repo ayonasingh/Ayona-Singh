@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "start": "cd backend && npm start",
     "build": "echo 'Build handled by Vercel'",
     "dev:backend": "cd backend && npm start",
     "dev:frontend": "cd react-portfolio && npm run dev"
