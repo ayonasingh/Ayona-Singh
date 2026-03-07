@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import './HomePage.css';
 import '../pages/pages.css';
 import axios from 'axios';
+import ScrollReveal from '../components/ScrollReveal/ScrollReveal';
+import { useStagger } from '../hooks/useAnimations';
 
 import AyonaHero from '../assets/ayona_profile.jpg';
 import AyonaAbout from '../assets/ayona_about.jpg';
@@ -268,7 +270,7 @@ const HomePage = () => {
     const [ctaRef, ctaVisible] = useReveal();
 
     return (
-        <div className="page-wrapper" style={{ paddingTop: '4rem' }}>
+        <div className="page-wrapper">
 
             {/*══════ HERO ══════*/}
             <section className="lp-hero">
@@ -384,18 +386,21 @@ const HomePage = () => {
 
                 <div className="lp-what__grid">
                     {WHAT_CARDS.map((card, i) => (
-                        <div
+                        <ScrollReveal
                             key={i}
-                            className={`lp-what__card reveal ${whatVisible ? 'visible' : ''}`}
-                            style={{ transitionDelay: `${i * 0.1}s` }}
+                            animation="fade-up"
+                            delay={i * 100}
+                            threshold={0.1}
                         >
-                            <div className="lp-what__icon-wrap">{card.icon}</div>
-                            <h3 className="lp-what__card-title">{card.title}</h3>
-                            <p className="lp-what__card-text">{card.text}</p>
-                            <Link to={card.link} className="lp-what__card-link">
-                                {card.linkText} <BiRightArrowAlt />
-                            </Link>
-                        </div>
+                            <div className="lp-what__card">
+                                <div className="lp-what__icon-wrap">{card.icon}</div>
+                                <h3 className="lp-what__card-title">{card.title}</h3>
+                                <p className="lp-what__card-text">{card.text}</p>
+                                <Link to={card.link} className="lp-what__card-link">
+                                    {card.linkText} <BiRightArrowAlt />
+                                </Link>
+                            </div>
+                        </ScrollReveal>
                     ))}
                 </div>
             </section>
@@ -443,29 +448,32 @@ const HomePage = () => {
 
                 <div className="lp-blogs__grid">
                     {featuredBlogs.map((b, i) => (
-                        <div
+                        <ScrollReveal
                             key={i}
-                            className={`lp-blog-card reveal ${blogVisible ? 'visible' : ''}`}
-                            style={{ transitionDelay: `${i * 0.12}s` }}
+                            animation="fade-up"
+                            delay={i * 120}
+                            threshold={0.1}
                         >
-                            <div className="lp-blog-card__img-wrap">
-                                <img src={getBlogImage(b, i)} alt={b.title} className="lp-blog-card__img" />
-                                <span className="lp-blog-card__tag">{b.tag}</span>
-                            </div>
-                            <div className="lp-blog-card__body">
-                                <h3 className="lp-blog-card__title">{b.title}</h3>
-                                <p className="lp-blog-card__excerpt">{b.excerpt}</p>
-                                <div className="lp-blog-card__footer">
-                                    <span className="lp-blog-card__date">
-                                        <BiCalendar style={{ verticalAlign: 'middle', marginRight: 3 }} />
-                                        {b.date}
-                                    </span>
-                                    <Link to={`/blogs/${b.id || b._id}`} className="lp-blog-card__link">
-                                        Read <BiRightArrowAlt />
-                                    </Link>
+                            <div className="lp-blog-card">
+                                <div className="lp-blog-card__img-wrap">
+                                    <img src={getBlogImage(b, i)} alt={b.title} className="lp-blog-card__img" />
+                                    <span className="lp-blog-card__tag">{b.tag}</span>
+                                </div>
+                                <div className="lp-blog-card__body">
+                                    <h3 className="lp-blog-card__title">{b.title}</h3>
+                                    <p className="lp-blog-card__excerpt">{b.excerpt}</p>
+                                    <div className="lp-blog-card__footer">
+                                        <span className="lp-blog-card__date">
+                                            <BiCalendar style={{ verticalAlign: 'middle', marginRight: 3 }} />
+                                            {b.date}
+                                        </span>
+                                        <Link to={`/blogs/${b.id || b._id}`} className="lp-blog-card__link">
+                                            Read <BiRightArrowAlt />
+                                        </Link>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </ScrollReveal>
                     ))}
                 </div>
 
@@ -498,43 +506,46 @@ const HomePage = () => {
                         };
                         const genreColor = genreColors[book.genre] || '#6d28d9';
                         return (
-                            <div
+                            <ScrollReveal
                                 key={id}
-                                className={`lp-book-card reveal ${bookVisible ? 'visible' : ''}`}
-                                style={{ transitionDelay: `${i * 0.1}s` }}
+                                animation="scale"
+                                delay={i * 100}
+                                threshold={0.1}
                             >
-                                <Link to={`/books/${id}`} className="lp-book-card__cover-link">
-                                    <img src={cover} alt={book.title} className="lp-book-card__cover" />
-                                    <div className="lp-book-card__cover-shine" />
-                                    {book.readDate && (
-                                        <span className="lp-book-card__read-badge">📖 {book.readDate}</span>
-                                    )}
-                                </Link>
-                                <div className="lp-book-card__body">
-                                    <span className="lp-book-card__genre"
-                                        style={{ background: genreColor + '22', color: genreColor }}>
-                                        {book.genre}
-                                    </span>
-                                    <h3 className="lp-book-card__title">
-                                        <Link to={`/books/${id}`}>{book.title}</Link>
-                                    </h3>
-                                    <p className="lp-book-card__author">by {book.author}</p>
-                                    <div className="lp-book-card__stars">
-                                        {[1, 2, 3, 4, 5].map(s => (
-                                            <span key={s} style={{ color: s <= (book.rating || 5) ? '#f59e0b' : 'rgba(150,120,80,0.3)' }}>★</span>
-                                        ))}
-                                    </div>
-                                    <p className="lp-book-card__excerpt">{book.excerpt}</p>
-                                    <div className="lp-book-card__actions">
-                                        <Link to={`/books/${id}`} className="lp-book-card__review">Read Review →</Link>
-                                        {book.downloadLink && (
-                                            <a href={book.downloadLink} target="_blank" rel="noreferrer" className="lp-book-card__dl">
-                                                ⬇ PDF
-                                            </a>
+                                <div className="lp-book-card">
+                                    <Link to={`/books/${id}`} className="lp-book-card__cover-link">
+                                        <img src={cover} alt={book.title} className="lp-book-card__cover" />
+                                        <div className="lp-book-card__cover-shine" />
+                                        {book.readDate && (
+                                            <span className="lp-book-card__read-badge">📖 {book.readDate}</span>
                                         )}
+                                    </Link>
+                                    <div className="lp-book-card__body">
+                                        <span className="lp-book-card__genre"
+                                            style={{ background: genreColor + '22', color: genreColor }}>
+                                            {book.genre}
+                                        </span>
+                                        <h3 className="lp-book-card__title">
+                                            <Link to={`/books/${id}`}>{book.title}</Link>
+                                        </h3>
+                                        <p className="lp-book-card__author">by {book.author}</p>
+                                        <div className="lp-book-card__stars">
+                                            {[1, 2, 3, 4, 5].map(s => (
+                                                <span key={s} style={{ color: s <= (book.rating || 5) ? '#f59e0b' : 'rgba(150,120,80,0.3)' }}>★</span>
+                                            ))}
+                                        </div>
+                                        <p className="lp-book-card__excerpt">{book.excerpt}</p>
+                                        <div className="lp-book-card__actions">
+                                            <Link to={`/books/${id}`} className="lp-book-card__review">Read Review →</Link>
+                                            {book.downloadLink && (
+                                                <a href={book.downloadLink} target="_blank" rel="noreferrer" className="lp-book-card__dl">
+                                                    ⬇ PDF
+                                                </a>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            </ScrollReveal>
                         );
                     })}
                 </div>

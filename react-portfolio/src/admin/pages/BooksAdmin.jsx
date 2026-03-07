@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { getBooks, createBook, updateBook, deleteBook, uploadImage } from '../api';
+import { getBooks, createBook, updateBook, deleteBook, uploadImage, uploadPDF } from '../api';
 import toast from 'react-hot-toast';
 import {
     BiBook, BiPlus, BiX, BiEdit, BiTrash, BiUpload,
-    BiDownload, BiToggleLeft, BiToggleRight,
+    BiDownload, BiToggleLeft, BiToggleRight, BiFile, BiLinkExternal,
 } from 'react-icons/bi';
 
 const STARS = [1, 2, 3, 4, 5];
@@ -38,8 +38,10 @@ const BooksAdmin = () => {
     const [editId, setEditId] = useState(null);
     const [form, setForm] = useState(EMPTY_FORM);
     const [uploading, setUploading] = useState(false);
+    const [uploadingPDF, setUploadingPDF] = useState(false);
     const [preview, setPreview] = useState('');
     const [customGenre, setCustomGenre] = useState(false);
+    const [pdfName, setPdfName] = useState('');
 
     const fetchBooks = () =>
         getBooks()
@@ -54,6 +56,7 @@ const BooksAdmin = () => {
         setForm(EMPTY_FORM);
         setPreview('');
         setCustomGenre(false);
+        setPdfName('');
         setShowForm(true);
     };
 
@@ -77,6 +80,7 @@ const BooksAdmin = () => {
             featured: b.featured ?? false,
         });
         setPreview(b.coverImage || '');
+        setPdfName(b.downloadLink ? 'Existing PDF link saved' : '');
         setShowForm(true);
     };
 
@@ -95,6 +99,25 @@ const BooksAdmin = () => {
             toast.error('Upload failed: ' + (err?.response?.data?.error || err.message));
         } finally {
             setUploading(false);
+        }
+    };
+
+    const handlePDFUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 50 * 1024 * 1024) return toast.error('PDF must be smaller than 50 MB');
+        setUploadingPDF(true);
+        const fd = new FormData();
+        fd.append('pdf', file);
+        try {
+            const res = await uploadPDF(fd);
+            setForm(prev => ({ ...prev, downloadLink: res.data.url }));
+            setPdfName(file.name);
+            toast.success('PDF uploaded successfully! ✨');
+        } catch (err) {
+            toast.error('PDF upload failed: ' + (err?.response?.data?.error || err.message));
+        } finally {
+            setUploadingPDF(false);
         }
     };
 
@@ -334,12 +357,60 @@ const BooksAdmin = () => {
                             <div className="admin-form__group">
                                 <label className="admin-form__label">
                                     <BiDownload style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                                    Download / PDF Link (optional)
+                                    Book PDF / Download Link
                                 </label>
+
+                                {/* PDF Upload Button */}
+                                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+                                    <label style={{
+                                        display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                                        padding: '0.55rem 1.1rem',
+                                        background: uploadingPDF ? 'rgba(99,102,241,0.3)' : 'linear-gradient(135deg, hsl(250,69%,45%), hsl(250,69%,55%))',
+                                        color: '#fff', borderRadius: '0.5rem', fontSize: '0.85rem',
+                                        fontWeight: 600, cursor: uploadingPDF ? 'not-allowed' : 'pointer',
+                                        transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(99,102,241,0.3)',
+                                        whiteSpace: 'nowrap',
+                                    }}>
+                                        <input
+                                            type="file"
+                                            accept=".pdf,application/pdf"
+                                            onChange={handlePDFUpload}
+                                            disabled={uploadingPDF}
+                                            style={{ display: 'none' }}
+                                        />
+                                        {uploadingPDF
+                                            ? <><span className="admin-spinner" style={{ width: 14, height: 14, display: 'inline-block', marginRight: 4 }} />Uploading…</>
+                                            : <><BiUpload /> Upload PDF</>}
+                                    </label>
+
+                                    {pdfName && (
+                                        <div style={{
+                                            display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                            background: 'rgba(16,185,129,0.12)', color: '#10b981',
+                                            border: '1px solid rgba(16,185,129,0.3)',
+                                            borderRadius: '0.5rem', padding: '0.4rem 0.75rem',
+                                            fontSize: '0.8rem', fontWeight: 500,
+                                        }}>
+                                            <BiFile />
+                                            <span style={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                {pdfName}
+                                            </span>
+                                            {form.downloadLink && (
+                                                <a href={form.downloadLink} target="_blank" rel="noreferrer" style={{ color: '#10b981', display: 'inline-flex' }} title="Preview PDF">
+                                                    <BiLinkExternal />
+                                                </a>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <p style={{ fontSize: '0.75rem', color: 'var(--admin-text-muted)', marginBottom: '0.5rem' }}>
+                                    Or paste an external link (Google Drive, Dropbox, etc.):
+                                </p>
                                 <input
                                     className="admin-form__input"
                                     value={form.downloadLink}
-                                    onChange={e => f('downloadLink', e.target.value)}
+                                    onChange={e => { f('downloadLink', e.target.value); if (e.target.value) setPdfName('External link'); else setPdfName(''); }}
                                     placeholder="https://drive.google.com/... or leave blank"
                                 />
                             </div>

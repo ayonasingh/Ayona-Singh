@@ -1,5 +1,16 @@
-/*==================== GOOGLE FONTS ====================*/
+/*==================== IMPORTS ====================*/
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
+@import './styles/theme.css';
+@import './styles/animations.css';
+
+/*==================== LIMEROCK FONT ====================*/
+@font-face {
+    font-family: 'Limerock';
+    src: url('https://fonts.cdnfonts.com/s/104893/Limerock.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
 
 /*==================== VARIABLES CSS ====================*/
 :root {
@@ -25,7 +36,8 @@
     --scroll-thumb-color: hsl(var(--hue-color), 12%, 80%);
 
     /*========== Font and typography ==========*/
-    --body-font: 'Poppins', sans-serif;
+    --body-font: 'Limerock', 'Poppins', sans-serif;
+    --heading-font: 'Limerock', 'Poppins', sans-serif;
 
     /* .5rem = 8px, 1rem = 16px, 1.5rem = 24px ... */
     --big-font-size: 2rem;
@@ -114,6 +126,13 @@ body {
     font-size: var(--normal-font-size);
     background-color: var(--body-color);
     color: var(--text-color);
+}
+
+/* On phone view we hide the top header, so remove its padding space */
+@media screen and (max-width: 767px) {
+    body {
+        padding-top: 0;
+    }
 }
 
 h1,

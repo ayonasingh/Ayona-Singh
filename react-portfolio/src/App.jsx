@@ -6,6 +6,7 @@ import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 import ScrollUp from './components/ScrollUp/ScrollUp';
 import CursorEffect from './components/CursorEffect/CursorEffect';
+import BottomNav from './components/BottomNav/BottomNav';
 
 /* Pages */
 import HomePage from './pages/HomePage';
@@ -75,6 +76,7 @@ function App() {
                     <Route path="/portfolio" element={<PortfolioPage />} />
                   </Routes>
                 </main>
+                <BottomNav />
                 <Footer />
                 <ScrollUp />
               </>

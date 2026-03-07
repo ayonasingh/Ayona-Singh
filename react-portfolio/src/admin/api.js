@@ -19,6 +19,9 @@ export const verifyToken = () => api.get('/auth/verify');
 export const uploadImage = (formData) =>
     api.post('/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 
+export const uploadPDF = (formData) =>
+    api.post('/upload-pdf', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+
 // Stats
 export const getStats = () => api.get('/stats');
 

@@ -40,6 +40,32 @@ const upload = multer({
     },
 });
 
+// ── PDF / File Upload Storage ──
+// Uploads raw files (PDFs, etc.) to Cloudinary using 'raw' resource type
+const pdfStorage = new CloudinaryStorage({
+    cloudinary,
+    params: async (req, file) => ({
+        folder: 'ayona-portfolio/books-pdf',
+        resource_type: 'raw',          // required for non-image files
+        public_id: `${Date.now()}-${file.originalname.replace(/\s+/g, '_')}`,
+        use_filename: true,
+        unique_filename: false,
+    }),
+});
+
+const pdfUpload = multer({
+    storage: pdfStorage,
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB limit for PDFs
+    fileFilter: (req, file, cb) => {
+        const ext = file.originalname.split('.').pop().toLowerCase();
+        if (ext === 'pdf' || file.mimetype === 'application/pdf') {
+            cb(null, true);
+        } else {
+            cb(new Error('Only PDF files are allowed'));
+        }
+    },
+});
+
 // Helper — delete a previously uploaded Cloudinary asset by its public_id
 const deleteFromCloudinary = async (url) => {
     try {
@@ -55,4 +81,4 @@ const deleteFromCloudinary = async (url) => {
     }
 };
 
-module.exports = { cloudinary, upload, deleteFromCloudinary };
+module.exports = { cloudinary, upload, pdfUpload, deleteFromCloudinary };

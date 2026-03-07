@@ -1,0 +1,12 @@
+.scroll-reveal {
+  opacity: 0;
+}
+
+.scroll-reveal.visible {
+  opacity: 1;
+}
+
+/* Ensure animations only play when visible */
+.scroll-reveal:not(.visible) {
+  animation: none !important;
+}

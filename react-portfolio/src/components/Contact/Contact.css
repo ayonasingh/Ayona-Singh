@@ -23,12 +23,25 @@
     border-radius: 0.75rem;
     text-align: center;
     border: 1px solid rgba(0, 0, 0, 0.1);
+    transition: all var(--duration-normal) var(--ease-out);
+}
+
+.contact__card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--first-color);
 }
 
 .contact__card-icon {
     font-size: 2rem;
     color: var(--title-color);
     margin-bottom: var(--mb-0-25);
+    transition: all var(--duration-normal) var(--ease-out);
+}
+
+.contact__card:hover .contact__card-icon {
+    color: var(--first-color);
+    transform: scale(1.1);
 }
 
 .contact__card-title,
@@ -88,6 +101,16 @@
     border-radius: 0.75rem;
     padding: 1.5rem;
     z-index: 1;
+    transition: all var(--duration-normal) var(--ease-out);
+}
+
+.contact__form-input:focus {
+    border-color: var(--first-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.contact__form-input:focus + .contact__form-tag {
+    color: var(--first-color);
 }
 
 .contact__form-tag {
@@ -98,6 +121,7 @@
     padding: 0.25rem;
     background-color: var(--body-color);
     z-index: 10;
+    transition: all var(--duration-normal) var(--ease-out);
 }
 
 .contact__form-area {

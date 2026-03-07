@@ -35,13 +35,14 @@
     line-height: 1;
 }
 
-/* ── Hero ── */
+/* ── Ultra Modern Hero ── */
 .book-detail-hero {
     position: relative;
     background: linear-gradient(135deg,
-            hsl(250, 69%, 10%) 0%,
-            color-mix(in srgb, var(--genre-color, hsl(250, 69%, 40%)) 25%, hsl(250, 69%, 12%)) 100%);
-    padding: 3rem 0 2.5rem;
+        hsl(var(--hue-color), 69%, 61%) 0%,
+        hsl(var(--hue-color), 75%, 65%) 50%,
+        hsl(340, 75%, 65%) 100%);
+    padding: 4rem 0 3rem;
     overflow: hidden;
 }
 
@@ -49,11 +50,9 @@
     position: absolute;
     inset: 0;
     background:
-        radial-gradient(ellipse 60% 80% at 85% 40%,
-            color-mix(in srgb, var(--genre-color, hsl(250, 69%, 54%)) 18%, transparent) 0%,
-            transparent 100%),
-        radial-gradient(circle 300px at 10% 80%,
-            hsl(270, 60%, 20%, 0.4) 0%, transparent 100%);
+        radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 70% 60%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    animation: meshMove 20s ease-in-out infinite;
     pointer-events: none;
 }
 
@@ -133,15 +132,19 @@
 
 .book-detail-hero__genre {
     display: inline-block;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
     color: #fff;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 700;
-    padding: 0.25rem 0.85rem;
-    border-radius: 999px;
-    margin-bottom: 0.9rem;
-    letter-spacing: 0.5px;
+    padding: 0.4rem 1.25rem;
+    border-radius: 50px;
+    margin-bottom: 1rem;
+    letter-spacing: 1px;
     text-transform: uppercase;
     font-family: var(--body-font);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .book-detail-hero__title {
@@ -196,23 +199,25 @@
 .book-detail-hero__download {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    background: linear-gradient(135deg, var(--genre-color, hsl(250, 69%, 54%)), hsl(270, 60%, 52%));
+    gap: 0.6rem;
+    background: linear-gradient(135deg, 
+        hsl(var(--hue-color), 69%, 61%),
+        hsl(var(--hue-color), 75%, 65%));
     color: #fff;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    padding: 0.75rem 1.75rem;
-    border-radius: 999px;
+    padding: 0.9rem 2rem;
+    border-radius: 50px;
     text-decoration: none;
-    transition: transform 0.25s, box-shadow 0.25s;
+    transition: all var(--duration-normal) var(--ease-out);
     font-family: var(--body-font);
-    letter-spacing: 0.3px;
-    box-shadow: 0 4px 18px color-mix(in srgb, var(--genre-color, hsl(250, 69%, 54%)) 40%, transparent);
+    letter-spacing: 0.5px;
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.35);
 }
 
 .book-detail-hero__download:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 28px color-mix(in srgb, var(--genre-color, hsl(250, 69%, 54%)) 55%, transparent);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.45);
 }
 
 .book-detail-hero__download-icon {
@@ -336,11 +341,14 @@
     justify-content: space-between;
     gap: 1.25rem;
     flex-wrap: wrap;
-    background: linear-gradient(135deg, hsl(250, 69%, 14%), hsl(270, 60%, 18%));
-    border-radius: 1rem;
-    padding: 1.5rem 1.75rem;
-    margin-top: 2rem;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(135deg,
+        hsl(var(--hue-color), 69%, 61%),
+        hsl(var(--hue-color), 75%, 65%));
+    border-radius: 1.25rem;
+    padding: 2rem 2.25rem;
+    margin-top: 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
 }
 
 .book-detail-cta-box__title {

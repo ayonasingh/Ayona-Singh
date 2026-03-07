@@ -181,7 +181,7 @@ const setSection = async (section, data) => {
 };
 
 // ===== Cloudinary Upload =====
-const { upload, deleteFromCloudinary } = require('./config/cloudinary');
+const { upload, pdfUpload, deleteFromCloudinary } = require('./config/cloudinary');
 
 // ===== Auth Middleware =====
 const authenticate = (req, res, next) => {
@@ -222,6 +222,20 @@ app.post('/api/upload', authenticate, (req, res, next) => {
         const url = req.file.path;
         const publicId = req.file.filename;
         res.json({ url, publicId });
+    });
+});
+
+// ============================
+// PDF UPLOAD ROUTE
+// ============================
+app.post('/api/upload-pdf', authenticate, (req, res) => {
+    pdfUpload.single('pdf')(req, res, (err) => {
+        if (err) return res.status(400).json({ error: err.message });
+        if (!req.file) return res.status(400).json({ error: 'No PDF file uploaded' });
+        // Cloudinary raw file URL — direct download link
+        const url = req.file.path;
+        const publicId = req.file.filename;
+        res.json({ url, publicId, name: req.file.originalname });
     });
 });
 

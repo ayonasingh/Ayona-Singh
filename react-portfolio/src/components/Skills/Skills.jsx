@@ -1,80 +1,198 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import './Skills.css';
-import { BiBadgeCheck } from 'react-icons/bi';
+import {
+    BiBadgeCheck,
+    BiBrain,
+    BiCodeAlt,
+    BiPulse,
+    BiPlanet
+} from 'react-icons/bi';
 import axios from 'axios';
 import BASE_URL from '../../config/api';
 
-const DEFAULT_MATH = [
-    { id: 's1', name: 'Calculus', level: 'Advanced' },
-    { id: 's2', name: 'Linear Algebra', level: 'Advanced' },
-    { id: 's3', name: 'Statistics', level: 'Intermediate' },
-    { id: 's4', name: 'Number Theory', level: 'Intermediate' },
-    { id: 's5', name: 'Differential Equations', level: 'Intermediate' },
-    { id: 's6', name: 'Real Analysis', level: 'Basic' },
-];
+const LEVEL_COLORS = {
+    Advanced: 'advanced',
+    Intermediate: 'intermediate',
+    Basic: 'basic',
+};
 
-const DEFAULT_TOOLS = [
-    { id: 't1', name: 'Python', level: 'Intermediate' },
-    { id: 't2', name: 'MATLAB', level: 'Basic' },
-    { id: 't3', name: 'LaTeX', level: 'Intermediate' },
-    { id: 't4', name: 'MS Excel', level: 'Advanced' },
-    { id: 't5', name: 'Data Analysis', level: 'Intermediate' },
-];
+const levelToPercent = (level) => {
+    if (level === 'Advanced') return 95;
+    if (level === 'Intermediate') return 75;
+    return 55;
+};
 
-const SkillItem = ({ name, level }) => (
-    <div className="skills__data">
-        <BiBadgeCheck className="bx bx-badge-check" />
-        <div>
-            <h3 className="skills__name">{name}</h3>
-            <span className="skills__level">{level}</span>
-        </div>
-    </div>
-);
+const SkillPill = ({ name, level }) => {
+    const colorClass = LEVEL_COLORS[level] || 'basic';
+    const percent = levelToPercent(level);
 
-const SkillGroup = ({ items }) => {
-    const half = Math.ceil(items.length / 2);
-    const col1 = items.slice(0, half);
-    const col2 = items.slice(half);
     return (
-        <div className="skills__box">
-            <div className="skills__group">
-                {col1.map((s) => <SkillItem key={s.id} name={s.name} level={s.level} />)}
+        <div className="skills-modern__item">
+            <div className="skills-modern__icon-wrap">
+                <BiBadgeCheck className="skills-modern__icon-check" />
             </div>
-            <div className="skills__group">
-                {col2.map((s) => <SkillItem key={s.id} name={s.name} level={s.level} />)}
+            <div className="skills-modern__content">
+                <div className="skills-modern__row">
+                    <span className="skills-modern__name">{name}</span>
+                    <span className={`skills-modern__level skills-modern__level--${colorClass}`}>
+                        {level}
+                    </span>
+                </div>
+                <div className="skills-modern__meter">
+                    <div
+                        className={`skills-modern__meter-fill skills-modern__meter-fill--${colorClass}`}
+                        style={{ width: `${percent}%` }}
+                    />
+                </div>
             </div>
         </div>
     );
 };
 
+const CategoryCard = ({ title, subtitle, icon, skills }) => {
+    return (
+        <div className="skills-modern__card">
+            <div className="skills-modern__card-header">
+                <div className="skills-modern__card-icon">{icon}</div>
+                <div>
+                    <h3 className="skills-modern__card-title">{title}</h3>
+                    <p className="skills-modern__card-subtitle">{subtitle}</p>
+                </div>
+            </div>
+
+            {skills.length === 0 ? (
+                <p className="skills-modern__empty">
+                    No skills added yet. Add them from your admin panel.
+                </p>
+            ) : (
+                <div className="skills-modern__grid">
+                    {skills.map((s) => (
+                        <SkillPill key={s.id || s._id || s.name} name={s.name} level={s.level} />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
 const Skills = () => {
-    const [mathCore, setMathCore] = useState(DEFAULT_MATH);
-    const [tools, setTools] = useState(DEFAULT_TOOLS);
+    const [skills, setSkills] = useState({ mathCore: [], tools: [] });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        axios.get(`${BASE_URL}/skills`)
+        let mounted = true;
+        setLoading(true);
+        axios
+            .get(`${BASE_URL}/skills`)
             .then((res) => {
-                if (res.data.mathCore) setMathCore(res.data.mathCore);
-                if (res.data.tools) setTools(res.data.tools);
+                if (!mounted) return;
+                const data = res.data || {};
+                setSkills({
+                    mathCore: data.mathCore || [],
+                    tools: data.tools || [],
+                });
             })
-            .catch(() => { /* use defaults */ });
+            .catch(() => {
+                if (!mounted) return;
+                setError('Unable to load skills right now.');
+            })
+            .finally(() => {
+                if (mounted) setLoading(false);
+            });
+
+        return () => {
+            mounted = false;
+        };
     }, []);
 
+    const totalCount = useMemo(
+        () => (skills.mathCore.length || 0) + (skills.tools.length || 0),
+        [skills]
+    );
+
+    const advancedCount = useMemo(
+        () =>
+            [...(skills.mathCore || []), ...(skills.tools || [])].filter(
+                (s) => s.level === 'Advanced'
+            ).length,
+        [skills]
+    );
+
     return (
-        <section className="skills section" id="skills">
-            <h2 className="section__title">Skills</h2>
-            <span className="section__subtitle">My mathematical level</span>
+        <section className="skills-modern section" id="skills">
+            <div className="container">
+                <div className="skills-modern__intro">
+                    <div className="skills-modern__badge-row">
+                        <span className="skills-modern__badge">
+                            <BiPulse /> Skills Matrix
+                        </span>
+                        <span className="skills-modern__badge skills-modern__badge--soft">
+                            <BiPlanet /> Continuously growing
+                        </span>
+                    </div>
 
-            <div className="skills__container container grid">
-                <div className="skills__content">
-                    <h3 className="skills__title">Mathematics Core</h3>
-                    <SkillGroup items={mathCore} />
+                    <h2 className="skills-modern__title">
+                        Mathematics & Technical Skills
+                    </h2>
+                    <p className="skills-modern__subtitle">
+                        A snapshot of my current strengths across core mathematics and the tools I use
+                        daily in research, tutoring, and data analysis.
+                    </p>
+
+                    <div className="skills-modern__stats">
+                        <div className="skills-modern__stat">
+                            <span className="skills-modern__stat-number">{totalCount}</span>
+                            <span className="skills-modern__stat-label">Total skills</span>
+                        </div>
+                        <div className="skills-modern__stat">
+                            <span className="skills-modern__stat-number">
+                                {advancedCount}
+                            </span>
+                            <span className="skills-modern__stat-label">Advanced level</span>
+                        </div>
+                        <div className="skills-modern__stat">
+                            <span className="skills-modern__stat-number">
+                                {skills.mathCore.length || 0}
+                            </span>
+                            <span className="skills-modern__stat-label">Math core</span>
+                        </div>
+                        <div className="skills-modern__stat">
+                            <span className="skills-modern__stat-number">
+                                {skills.tools.length || 0}
+                            </span>
+                            <span className="skills-modern__stat-label">Tools & tech</span>
+                        </div>
+                    </div>
+
+                    {loading && (
+                        <div className="skills-modern__loading">
+                            <span className="skills-modern__spinner" />
+                            <span>Loading your skills…</span>
+                        </div>
+                    )}
+                    {error && !loading && (
+                        <p className="skills-modern__error">{error}</p>
+                    )}
                 </div>
 
-                <div className="skills__content">
-                    <h3 className="skills__title">Tools &amp; Technical</h3>
-                    <SkillGroup items={tools} />
-                </div>
+                {!loading && (
+                    <div className="skills-modern__cards">
+                        <CategoryCard
+                            title="Mathematics Core"
+                            subtitle="Foundational and advanced topics in pure and applied mathematics."
+                            icon={<BiBrain />}
+                            skills={skills.mathCore}
+                        />
+
+                        <CategoryCard
+                            title="Tools & Technical"
+                            subtitle="Programming languages, software and analytical workflows I use."
+                            icon={<BiCodeAlt />}
+                            skills={skills.tools}
+                        />
+                    </div>
+                )}
             </div>
         </section>
     );
