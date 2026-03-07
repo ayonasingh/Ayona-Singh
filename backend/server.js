@@ -199,7 +199,21 @@ const setSection = async (section, data) => {
 };
 
 // ===== Cloudinary Upload =====
-const { upload, pdfUpload, deleteFromCloudinary } = require('./config/cloudinary');
+let upload, pdfUpload, deleteFromCloudinary;
+try {
+    const cloudinaryConfig = require('./config/cloudinary');
+    upload = cloudinaryConfig.upload;
+    pdfUpload = cloudinaryConfig.pdfUpload;
+    deleteFromCloudinary = cloudinaryConfig.deleteFromCloudinary;
+    console.log('✅ Cloudinary loaded');
+} catch (e) {
+    console.error('❌ Cloudinary load failed:', e.message);
+    // Stub fallbacks so routes don't crash on require
+    const multer = require('multer');
+    upload = multer();
+    pdfUpload = multer();
+    deleteFromCloudinary = async () => {};
+}
 
 // ===== Auth Middleware =====
 const authenticate = (req, res, next) => {
@@ -651,15 +665,19 @@ app.get('/api/db-status', authenticate, (req, res) => {
 // ============================
 // CHAT SYSTEM ROUTES (Without Socket.IO)
 // ============================
-const userRoutes = require('./routes/userRoutes');
-const messageRoutes = require('./routes/messageRoutes');
-const conversationRoutes = require('./routes/conversationRoutes');
-const adminRoutes = require('./routes/adminRoutes');
-
-app.use('/api/users', userRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/conversations', conversationRoutes);
-app.use('/api/admin', adminRoutes);
+try {
+    const userRoutes = require('./routes/userRoutes');
+    const messageRoutes = require('./routes/messageRoutes');
+    const conversationRoutes = require('./routes/conversationRoutes');
+    const adminRoutes = require('./routes/adminRoutes');
+    app.use('/api/users', userRoutes);
+    app.use('/api/messages', messageRoutes);
+    app.use('/api/conversations', conversationRoutes);
+    app.use('/api/admin', adminRoutes);
+    console.log('✅ Chat routes loaded');
+} catch (e) {
+    console.error('❌ Chat routes load failed:', e.message);
+}
 
 // ============================
 // Start Server (Local Development Only)
@@ -678,6 +696,19 @@ connectDB().then(() => {
             }
         });
     }
+});
+
+// ============================
+// Global Error Handler
+// ============================
+app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err.message || err);
+    res.status(500).json({ error: 'Internal server error', message: err.message });
+});
+
+// Catch unhandled promise rejections (prevents Vercel cold-start crash)
+process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled Rejection:', reason);
 });
 
 // Export for Vercel serverless
