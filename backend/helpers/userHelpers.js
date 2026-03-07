@@ -2,8 +2,12 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 
-const dataDir = path.join(__dirname, '..', 'data');
+const IS_VERCEL = process.env.VERCEL === '1';
+const dataDir = IS_VERCEL ? '/tmp/data' : path.join(__dirname, '..', 'data');
 const usersFile = path.join(dataDir, 'users.json');
+
+// Ensure dir exists (safe for Vercel /tmp)
+try { if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true }); } catch(e) {}
 
 // Read users from JSON
 const readUsers = () => {

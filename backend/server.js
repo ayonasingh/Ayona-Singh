@@ -44,10 +44,28 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ===== Ensure directories exist =====
-const dataDir = path.join(__dirname, 'data');
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+// On Vercel, __dirname is read-only. Use /tmp for writable storage (ephemeral),
+// but fall back to the bundled 'data/' folder for reads.
+const IS_VERCEL = process.env.VERCEL === '1';
+const dataDir = IS_VERCEL ? '/tmp/data' : path.join(__dirname, 'data');
+const uploadsDir = IS_VERCEL ? '/tmp/uploads' : path.join(__dirname, 'uploads');
+try {
+    if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+} catch (e) {
+    console.warn('⚠️  Could not create data/uploads dirs:', e.message);
+}
+
+// ===== Health-check / root route =====
+app.get('/', (req, res) => {
+    res.json({
+        status: 'ok',
+        message: 'Ayona Singh Portfolio API is running 🚀',
+        version: '1.0.0',
+        db: useDB ? 'MongoDB' : 'JSON (fallback)',
+        endpoints: '/api/home | /api/about | /api/blogs | /api/books | /api/skills | /api/contact-info'
+    });
+});
 
 // ===== DB: MongoDB Models =====
 let SiteContent, Blog, Contact, Book;
