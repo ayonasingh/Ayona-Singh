@@ -43,6 +43,12 @@ app.use(cors({
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Ensure DB is connected on every request (critical for Vercel serverless)
+app.use(async (req, res, next) => {
+    await connectDB();
+    next();
+});
+
 // ===== Ensure directories exist =====
 // On Vercel, __dirname is read-only. Use /tmp for writable storage (ephemeral),
 // but fall back to the bundled 'data/' folder for reads.
@@ -82,27 +88,38 @@ const writeJSON = (file, data) => {
 };
 
 // ===== MongoDB connect =====
+let dbConnectPromise = null;
+
 const connectDB = async () => {
     if (!MONGO_URI) {
         console.log('⚠️  MONGO_URI not set – using JSON file storage');
         return;
     }
-    try {
-        await mongoose.connect(MONGO_URI);
-        console.log('✅ MongoDB connected successfully');
+    // Already connected or connecting
+    if (mongoose.connection.readyState === 1) return;
+    if (dbConnectPromise) return dbConnectPromise;
 
-        // Load models after connection
-        SiteContent = require('./models/SiteContent');
-        Blog = require('./models/Blog');
-        Contact = require('./models/Contact');
-        Book = require('./models/Book');
-        useDB = true;
+    dbConnectPromise = (async () => {
+        try {
+            await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 10000 });
+            console.log('✅ MongoDB connected successfully');
 
-        await seedDefaults();
-    } catch (err) {
-        console.error('❌ MongoDB error:', err.message);
-        console.log('⚠️  Falling back to JSON file storage');
-    }
+            // Load models after connection
+            SiteContent = require('./models/SiteContent');
+            Blog = require('./models/Blog');
+            Contact = require('./models/Contact');
+            Book = require('./models/Book');
+            useDB = true;
+
+            await seedDefaults();
+        } catch (err) {
+            console.error('❌ MongoDB error:', err.message);
+            console.log('⚠️  Falling back to JSON file storage');
+            dbConnectPromise = null;
+        }
+    })();
+
+    return dbConnectPromise;
 };
 
 const DEFAULT_SECTIONS = {
